@@ -1,0 +1,47 @@
+{
+  "name": "forkos",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22.10"
+  },
+  "scripts": {
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:migrate": "tsx --env-file-if-exists=.env scripts/migrate.ts",
+    "keys:new": "tsx scripts/new-keys.ts",
+    "bootstrap:hedera": "tsx --env-file-if-exists=.env scripts/bootstrap-hedera.ts",
+    "smoke:arkiv": "tsx --env-file-if-exists=.env scripts/smoke-arkiv.ts",
+    "smoke:hcs": "tsx --env-file-if-exists=.env scripts/smoke-hcs.ts",
+    "smoke:pay": "tsx --env-file-if-exists=.env scripts/smoke-pay.ts",
+    "smoke:world": "tsx --env-file-if-exists=.env scripts/smoke-world.ts",
+    "audio:sample": "tsx --env-file-if-exists=.env scripts/make-sample-audio.ts",
+    "dev:facilitator": "pnpm --filter @forkos/facilitator dev",
+    "dev:scribe-a": "pnpm --filter @forkos/provider dev:a",
+    "dev:scribe-b": "pnpm --filter @forkos/provider dev:b",
+    "dev:scribe-premium": "pnpm --filter @forkos/provider dev:premium",
+    "dev:api": "pnpm --filter @forkos/api dev",
+    "agents": "pnpm --filter @forkos/agents start",
+    "baseline": "pnpm --filter @forkos/agents baseline",
+    "mcp": "pnpm --filter forkos-mcp start",
+    "forkos": "pnpm --filter forkos start",
+    "e2e": "tsx --env-file-if-exists=.env scripts/e2e.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@arkiv-network/sdk": "1.0.1",
+    "@hiero-ledger/sdk": "2.90.1",
+    "@types/node": "^22.10.0",
+    "@x402/core": "2.30.0",
+    "@x402/hedera": "2.30.0",
+    "openai": "^7.52.0",
+    "postgres": "3.4.9",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.3",
+    "viem": "^2.40.0",
+    "vitest": "^3.2.0",
+    "zod": "^3.25.0"
+  }
+}

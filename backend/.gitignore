@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.secrets/
+*.log
+.DS_Store
+apps/web/dist/
+services/provider/public/*.mp3
+!services/provider/public/sample-meeting.mp3
+coverage/

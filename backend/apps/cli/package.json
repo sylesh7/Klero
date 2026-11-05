@@ -1,0 +1,13 @@
+{
+  "name": "forkos",
+  "version": "0.1.0",
+  "description": "ForkOS CLI: audit exactly-once agent payments from Hedera Mirror Node.",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "forkos": "./src/index.ts" },
+  "scripts": { "start": "tsx --env-file-if-exists=../../.env src/index.ts" },
+  "dependencies": {
+    "@forkos/shared": "workspace:*",
+    "commander": "^12.1.0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "forkos-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that gives any agent a safe, exactly-once pay tool (ForkOS).",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "forkos-mcp": "./src/index.ts" },
+  "scripts": { "start": "tsx --env-file-if-exists=../../.env src/index.ts" },
+  "dependencies": {
+    "@forkos/agent-kit": "workspace:*",
+    "@forkos/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "zod": "^3.25.0"
+  }
+}

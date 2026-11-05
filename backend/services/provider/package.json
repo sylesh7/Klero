@@ -1,0 +1,26 @@
+{
+  "name": "@forkos/provider",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:a": "tsx watch --env-file-if-exists=../../.env --env-file-if-exists=../../.env.scribe-a src/index.ts",
+    "dev:b": "tsx watch --env-file-if-exists=../../.env --env-file-if-exists=../../.env.scribe-b src/index.ts",
+    "dev:premium": "tsx watch --env-file-if-exists=../../.env --env-file-if-exists=../../.env.scribe-premium src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@arkiv-network/sdk": "1.0.1",
+    "@fastify/static": "^8.2.0",
+    "@forkos/shared": "workspace:*",
+    "@hiero-ledger/sdk": "2.90.1",
+    "@x402/core": "2.30.0",
+    "@x402/fastify": "2.30.0",
+    "@x402/hedera": "2.30.0",
+    "fastify": "^5.6.0",
+    "openai": "^7.52.0",
+    "postgres": "3.4.9",
+    "viem": "^2.40.0",
+    "zod": "^3.25.0"
+  }
+}

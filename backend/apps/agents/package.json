@@ -1,0 +1,21 @@
+{
+  "name": "@forkos/agents",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx --env-file-if-exists=../../.env src/run.ts",
+    "baseline": "tsx --env-file-if-exists=../../.env src/baseline.ts",
+    "link": "tsx --env-file-if-exists=../../.env src/link.ts"
+  },
+  "dependencies": {
+    "@forkos/agent-kit": "workspace:*",
+    "@forkos/shared": "workspace:*",
+    "@hiero-ledger/sdk": "2.90.1",
+    "@x402/core": "2.30.0",
+    "@x402/fetch": "2.30.0",
+    "@x402/hedera": "2.30.0",
+    "openai": "^7.52.0",
+    "zod": "^3.25.0"
+  }
+}

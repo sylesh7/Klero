@@ -1,0 +1,14 @@
+{
+  "name": "@forkos/x402-hedera",
+  "version": "0.1.0",
+  "description": "Payment intents with a death clock for x402 on Hedera: paid exactly once, or provably never.",
+  "license": "MIT",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@forkos/shared": "workspace:*",
+    "@hiero-ledger/sdk": "2.90.1",
+    "@x402/core": "2.30.0",
+    "@x402/hedera": "2.30.0"
+  }
+}
