@@ -32,6 +32,8 @@
   },
   "devDependencies": {
     "@arkiv-network/sdk": "1.0.1",
+    "@forkos/shared": "workspace:^",
+    "@forkos/x402-hedera": "workspace:^",
     "@hiero-ledger/sdk": "2.90.1",
     "@types/node": "^22.10.0",
     "@x402/core": "2.30.0",

@@ -11,6 +11,12 @@ importers:
       '@arkiv-network/sdk':
         specifier: 1.0.1
         version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))
+      '@forkos/shared':
+        specifier: workspace:^
+        version: link:packages/shared
+      '@forkos/x402-hedera':
+        specifier: workspace:^
+        version: link:packages/x402-hedera
       '@hiero-ledger/sdk':
         specifier: 2.90.1
         version: 2.90.1
