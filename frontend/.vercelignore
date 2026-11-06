@@ -1,0 +1,7 @@
+node_modules
+.next
+*.tsbuildinfo
+# local env files hold the demo key — production config comes from Vercel project env vars
+.env*
+!.env.example
+.contract-check.local.*
