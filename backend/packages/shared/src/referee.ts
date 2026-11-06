@@ -10,7 +10,6 @@ export type ClaimView = {
   epoch: number;
   svc: string;
   price: string;
-  arkivKey: string;
   valid: boolean;
   reason: null | 'WRONG_ROUND' | 'NOT_LINKED' | 'REVOKED' | 'PAYER_MISMATCH' | 'WRONG_HUMAN' | 'STALE_EPOCH';
 };
@@ -117,7 +116,6 @@ export function viewJob(messages: Decoded[], jobKey: string, opts: RefereeOption
           epoch: m.epoch,
           svc: m.svc,
           price: m.price,
-          arkivKey: m.ak,
           valid: reason === null,
           reason,
         };

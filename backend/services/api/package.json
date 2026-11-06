@@ -8,7 +8,6 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
-    "@arkiv-network/sdk": "1.0.1",
     "@fastify/cors": "^11.0.0",
     "@forkos/shared": "workspace:*",
     "@forkos/x402-hedera": "workspace:*",

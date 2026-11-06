@@ -20,7 +20,6 @@ export type AgentRow = {
   public_key_hex: string;
   epoch: number;
   status: 'ACTIVE' | 'REVOKED';
-  arkiv_key: string | null;
   link_seq: string | null;
   linked_at: Date;
   revoked_at: Date | null;
@@ -87,6 +86,7 @@ export type IntentRow = {
   settle_response: Record<string, unknown> | null;
   result: Record<string, unknown> | null;
   consensus_ts: string | null;
+  agentkit_header: string | null; // World AgentKit header signed by the agent (migration 002)
   created_at: Date;
   updated_at: Date;
 };

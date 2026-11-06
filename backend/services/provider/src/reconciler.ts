@@ -21,7 +21,7 @@ export function startReconciler(log: FastifyBaseLogger) {
         const deadline = validStartSecondsOf(row.payment_tx_id) + VALID_DURATION_S;
         if (found.found && found.success) {
           log.info({ id: row.id }, 'reconciler: payment settled, running job');
-          const after = await runJob(row.id, { jobKey: row.job_key, round: row.round, agent: row.agent_addr, claimKey: '', chaosFail: false }, log);
+          const after = await runJob(row.id, { jobKey: row.job_key, round: row.round, agent: row.agent_addr, chaosFail: false }, log);
           if (after.status === 'FAILED') await refundJob(after, log);
         } else if ((found.found && !found.success) || Date.now() / 1000 > deadline + VOID_MARGIN_S) {
           await sql`update prov_jobs set status = 'PAYMENT_FAILED', error = 'payment did not settle (reconciler)', updated_at = now() where id = ${row.id}`;

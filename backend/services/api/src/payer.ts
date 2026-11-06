@@ -1,21 +1,19 @@
 import {
   ApiError,
   H_AGENT,
-  H_CLAIM,
   H_JOB,
   H_ROUND,
   NETWORK,
   digestOf,
   intentIdOf,
   jobKeyOf,
-  listServices,
   memoOf,
   publishHcs,
 } from '@forkos/shared';
 import { buildIntentPayment, canResend, pickRequirement, type PaymentIntent } from '@forkos/x402-hedera';
 import { x402Client, x402HTTPClient } from '@x402/core/client';
 import type { PaymentPayload } from '@x402/core/types';
-import { arkivPub, hedera } from './clients';
+import { hedera, services } from './clients';
 import { env } from './config';
 import { decrypt } from './crypto';
 import { sql, type AgentRow, type HumanRow, type IntentRow } from './db';
@@ -27,7 +25,7 @@ import { chaos } from './chaosState';
 // Header codec only (no schemes needed for encoding / parsing).
 const httpClient = new x402HTTPClient(new x402Client());
 
-export type PayInput = { jobKey: string; round: number; audioUrl: string; inputHash: string; approvalId?: string };
+export type PayInput = { jobKey: string; round: number; audioUrl: string; inputHash: string; approvalId?: string; agentkit?: string };
 
 export async function pay(agent: AgentRow, input: PayInput) {
   // 1. scope: only jobs of this agent's human
@@ -48,9 +46,9 @@ export async function pay(agent: AgentRow, input: PayInput) {
   const [same] = await sql<IntentRow[]>`select * from intents where job_key = ${input.jobKey} and round = ${input.round}`;
   if (same) return describe(same);
 
-  // 4. service from the Arkiv directory (the winner chose it in its claim)
-  const service = (await listServices(arkivPub)).find((s) => s.providerId === view.winner!.svc);
-  if (!service) throw new ApiError('UPSTREAM_FAILED', `service ${view.winner.svc} not in the Arkiv directory`);
+  // 4. service from the HCS directory (the winner chose it in its claim; registered provider accounts only)
+  const service = (await services()).find((s) => s.providerId === view.winner!.svc);
+  if (!service) throw new ApiError('UPSTREAM_FAILED', `service ${view.winner.svc} not in the HCS directory`);
   if (service.asset !== env.PAY_ASSET) throw new ApiError('POLICY_DENIED', 'service asks for an unsupported asset');
 
   // 5. policy
@@ -77,7 +75,6 @@ export async function pay(agent: AgentRow, input: PayInput) {
     [H_JOB]: input.jobKey,
     [H_ROUND]: String(input.round),
     [H_AGENT]: agent.agent_addr,
-    [H_CLAIM]: view.winner.arkivKey,
   };
   const body = JSON.stringify({ audioUrl: input.audioUrl, inputHash: input.inputHash });
   const challenge = await fetch(service.endpoint, { method: 'POST', headers, body });
@@ -90,7 +87,7 @@ export async function pay(agent: AgentRow, input: PayInput) {
   const req = pickRequirement(pr, NETWORK, env.PAY_ASSET);
   // re-quote check: what we are about to sign must match the directory + policy decision
   if (req.payTo !== service.payTo || BigInt(req.amount) !== service.price) {
-    throw new ApiError('POLICY_DENIED', 'provider quote differs from the Arkiv directory (payTo or price changed)');
+    throw new ApiError('POLICY_DENIED', 'provider quote differs from the HCS directory (payTo or price changed)');
   }
 
   // 7. build the intent from the human's budget account; persist BEFORE anything is sent
@@ -157,12 +154,14 @@ async function persistIntent(
     }
     await tx`
       insert into intents (id, job_key, round, human_hash, agent_addr, provider_id, endpoint, pay_to, asset, amount, tx_id,
-                           valid_start_ms, deadline_s, memo, payment_payload, requirements, request_body, status, approval_id)
+                           valid_start_ms, deadline_s, memo, payment_payload, requirements, request_body, status, approval_id,
+                           agentkit_header)
       values (${id}, ${input.jobKey}, ${input.round}, ${agent.human_hash}, ${agent.agent_addr}, ${providerId}, ${endpoint},
               ${intent.requirements.payTo}, ${intent.requirements.asset}, ${intent.requirements.amount}, ${intent.txId},
               ${intent.validStartMs}, ${intent.deadlineS}, ${intent.memo}, ${tx.json({ pending: true } as never)},
               ${tx.json(intent.requirements as never)},
-              ${tx.json({ audioUrl: input.audioUrl, inputHash: input.inputHash } as never)}, 'CREATED', ${input.approvalId ?? null})`;
+              ${tx.json({ audioUrl: input.audioUrl, inputHash: input.inputHash } as never)}, 'CREATED', ${input.approvalId ?? null},
+              ${input.agentkit ?? null})`;
   });
 }
 
@@ -178,8 +177,8 @@ export async function sendIntent(row: IntentRow): Promise<IntentRow> {
     [H_JOB]: row.job_key,
     [H_ROUND]: String(row.round),
     [H_AGENT]: row.agent_addr,
-    [H_CLAIM]: view.winner?.arkivKey ?? '',
     ...httpClient.encodePaymentSignatureHeader(row.payment_payload as unknown as PaymentPayload),
+    ...(row.agentkit_header ? { agentkit: row.agentkit_header } : {}), // World AgentKit, signed by the agent
     ...(chaos.takeFail() ? { 'x-forkos-chaos-fail': '1' } : {}),
   };
   await sql`update intents set status = 'SENT', attempts = attempts + 1, updated_at = now() where id = ${row.id}`;

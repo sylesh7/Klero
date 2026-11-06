@@ -15,7 +15,6 @@ const agent = await new ForkosAgent({
   key: need('FORKOS_AGENT_KEY') as `0x${string}`,
   token: need('FORKOS_AGENT_TOKEN'),
   apiUrl: need('FORKOS_API_URL'),
-  arkivAccessKey: need('ARKIV_ACCESS_KEY'),
   log: (m, e) => console.error(`[forkos] ${m}`, e ?? ''),
 }).init();
 
@@ -30,7 +29,7 @@ server.registerTool(
 
 server.registerTool(
   'forkos_services',
-  { title: 'Paid services', description: 'Lists x402 transcription services from the public Arkiv directory with prices.' },
+  { title: 'Paid services', description: 'Lists x402 transcription services from the Hedera HCS directory (registered providers only) with prices.' },
   async () => text((await agent.discover()).map((s) => ({ providerId: s.providerId, name: s.name, price: s.price.toString(), endpoint: s.endpoint }))),
 );
 

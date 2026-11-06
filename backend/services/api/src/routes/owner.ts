@@ -66,7 +66,6 @@ export function registerOwnerRoutes(app: FastifyInstance) {
         epoch: a.epoch,
         status: a.status,
         linkedAt: a.linked_at,
-        arkivKey: a.arkiv_key,
       })),
       pairing: pairing ? { code: pairing.code, expiresAt: pairing.expires_at } : null,
       world: { subStable: env.WORLD_SUB_STABLE },

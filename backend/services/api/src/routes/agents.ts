@@ -1,7 +1,7 @@
 import { ApiError, publishHcs, zEvmAddr } from '@forkos/shared';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { assertKeyMatchesAddress, linkAgent, upsertAgentLinkEntity } from '../agents';
+import { assertKeyMatchesAddress, linkAgent } from '../agents';
 import { consumeApproval, createApproval, setApprovalStatus } from '../approvals';
 import { requireAgent, requireOwner } from '../auth';
 import { hedera } from '../clients';
@@ -77,7 +77,6 @@ export function registerAgentRoutes(app: FastifyInstance) {
         epoch: a.epoch,
         status: a.status,
         linkedAt: a.linked_at,
-        arkivKey: a.arkiv_key,
       })),
     };
   });
@@ -136,7 +135,6 @@ async function executeRevoke(approval: ApprovalRow) {
     return a;
   });
   await publishHcs(hedera, env.HCS_TOPIC_ID, { v: 1, t: 'REVOKE', human: action.human, agent: action.agent, epoch: newEpoch });
-  await upsertAgentLinkEntity({ human: action.human, agent: action.agent, status: 'REVOKED', epoch: newEpoch, acct: agent.account_id, label: agent.label });
   await publishApproval(action.human, 'REVOKE', approval.digest);
   await emit('agent.revoked', { humanHash: action.human, agentAddr: action.agent, epoch: newEpoch });
 }

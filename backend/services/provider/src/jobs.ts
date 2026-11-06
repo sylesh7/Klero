@@ -3,7 +3,7 @@ import { sql, type JobRow } from './db';
 import { fence } from './fence';
 import { fetchAudio, transcribeAndSummarize } from './transcribe';
 
-type Ctx = { jobKey: string; round: number; agent: string; claimKey: string; chaosFail: boolean };
+type Ctx = { jobKey: string; round: number; agent: string; chaosFail: boolean };
 
 async function fail(id: string, error: string): Promise<JobRow> {
   const [row] = await sql<JobRow[]>`update prov_jobs set status = 'FAILED', error = ${error}, updated_at = now() where id = ${id} returning *`;

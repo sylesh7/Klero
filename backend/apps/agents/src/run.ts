@@ -18,7 +18,7 @@ console.log('job audio:', job.audioUrl, job.inputHash);
 
 const results = await Promise.all(
   linked.slice(0, count).map(async ([label, v], i) => {
-    const agent = await new ForkosAgent({ key: v.key, token: v.token!, apiUrl, arkivAccessKey: process.env.ARKIV_ACCESS_KEY! }).init();
+    const agent = await new ForkosAgent({ key: v.key, token: v.token!, apiUrl }).init();
     const out = await agent.buy(job.audioUrl, (services) => llmChoose(PERSONAS[i % PERSONAS.length]!, services));
     agent.close();
     return { label, kind: out.kind };

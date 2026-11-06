@@ -1,11 +1,11 @@
-import { ApiError, H_AGENT, H_CLAIM, H_JOB, H_ROUND, listServices } from '@forkos/shared';
+import { ApiError, H_AGENT, H_JOB, H_ROUND } from '@forkos/shared';
 import { HTTPFacilitatorClient } from '@x402/core/server';
 import type { PaymentPayload, PaymentRequirements } from '@x402/core/types';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireDemo } from '../auth';
 import { chaos } from '../chaosState';
-import { arkivPub } from '../clients';
+import { services } from '../clients';
 import { env } from '../config';
 import { sql, type IntentRow } from '../db';
 import { emit } from '../events';
@@ -44,11 +44,11 @@ export function registerChaosRoutes(app: FastifyInstance) {
     const view = await jobView(jobKey);
     const claim = [...view.claims].reverse().find((c) => c.agent === agentAddr);
     if (!claim) throw new ApiError('NOT_FOUND', 'this agent has no claim on that job');
-    const svc = (await listServices(arkivPub)).find((s) => s.providerId === claim.svc);
+    const svc = (await services()).find((s) => s.providerId === claim.svc);
     if (!svc) throw new ApiError('NOT_FOUND', 'service not in directory');
     const res = await fetch(svc.endpoint, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', [H_JOB]: jobKey, [H_ROUND]: String(view.round), [H_AGENT]: agentAddr, [H_CLAIM]: claim.arkivKey },
+      headers: { 'content-type': 'application/json', [H_JOB]: jobKey, [H_ROUND]: String(view.round), [H_AGENT]: agentAddr },
       body: JSON.stringify({ audioUrl: env.SAMPLE_AUDIO_URL, inputHash: 'sha256:' + '0'.repeat(64) }),
     });
     const body = await res.json().catch(() => ({}));

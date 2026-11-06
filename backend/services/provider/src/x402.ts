@@ -37,7 +37,7 @@ export async function requirements(): Promise<PaymentRequirements[]> {
   );
 }
 
-export async function send402(reply: FastifyReply, reqs: PaymentRequirements[], error?: string) {
+export async function send402(reply: FastifyReply, reqs: PaymentRequirements[], error?: string, extensions?: Record<string, unknown>) {
   const pr = await resourceServer.createPaymentRequiredResponse(
     reqs,
     {
@@ -47,6 +47,7 @@ export async function send402(reply: FastifyReply, reqs: PaymentRequirements[], 
       serviceName: env.PROVIDER_NAME,
     },
     error,
+    extensions,
   );
   return reply.code(402).header('PAYMENT-REQUIRED', encodePaymentRequiredHeader(pr)).send(pr);
 }
