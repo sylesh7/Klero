@@ -31,6 +31,10 @@ export const env = loadEnv({
     .default('true')
     .transform((v) => v === 'true'),
   WORLD_FRESH_SECONDS: z.coerce.number().int().positive().default(300),
+  // Optional space-separated acr_values sent on every device authorization. Setting it to
+  // https://world.org/oidc/acr/orb-face makes World ask for a World ID app proof (Orb + Face Auth)
+  // instead of offering a passkey first. Empty = World's default behaviour.
+  WORLD_ACR_VALUES: z.string().trim().default(''),
   POLICY_DEFAULT_CAP: zIntString.default('1000000'),
   POLICY_DEFAULT_DAILY: zIntString.default('5000000'),
   DEMO_KEY: z.string().min(16),

@@ -47,6 +47,7 @@ export async function startDeviceFlow(
   const body = new URLSearchParams({ client_id: env.WORLD_CLIENT_ID, client_secret: env.WORLD_CLIENT_SECRET, scope: 'openid' });
   const pinSub = Boolean(opts.expectedSub && env.WORLD_SUB_STABLE);
   if (pinSub) body.set('claims', JSON.stringify({ id_token: { sub: { value: opts.expectedSub } } }));
+  if (env.WORLD_ACR_VALUES) body.set('acr_values', env.WORLD_ACR_VALUES);
 
   const res = await fetch(d.device_authorization_endpoint, {
     method: 'POST',
