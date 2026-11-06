@@ -1,6 +1,9 @@
+import HeroGlobe from './HeroGlobe';
+
 export default function Hero() {
   return (
-    <section className="hero-banner-section">
+    <section className="hero-banner-section" style={{ position: 'relative', overflow: 'hidden', isolation: 'isolate' }}>
+      <HeroGlobe />
       <div fade-anim="True" className="section-wrap">
         <div className="container-2nd">
           <div className="hero-banner-wrapper">

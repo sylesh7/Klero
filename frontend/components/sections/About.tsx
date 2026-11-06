@@ -54,7 +54,7 @@ export default function About() {
                 </div>
                 <div fade-anim="True" className="home-about-author-wrap">
                   <div className="home-about-author-img-box">
-                    <img src="/assets/klero-mark.svg" loading="lazy" alt="Klero" className="home-about-author-img" />
+                    <img src="/assets/klero_mark.png" loading="lazy" alt="Klero" className="home-about-author-img" style={{ borderRadius: "50%", objectFit: "cover" }} />
                   </div>
                   <div className="home-about-author-info-box">
                     <div className="home-about-author-name">
