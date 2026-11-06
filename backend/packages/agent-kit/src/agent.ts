@@ -28,6 +28,14 @@ export type BuyOutcome =
   | { kind: 'PAID_BY_OTHER'; jobKey: string; round: number; result: unknown; winner: string }
   | { kind: 'FAILED'; jobKey: string; reason: string };
 
+/** True for errors worth retrying: an API 5xx (e.g. Mirror Node unavailable upstream) or a network failure. */
+export function isTransient(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  const status = /→ (\d{3}) /.exec(msg)?.[1];
+  if (status) return Number(status) >= 500;
+  return /fetch failed|ECONNRESET|ECONNREFUSED|ETIMEDOUT|socket|network/i.test(msg);
+}
+
 export class ForkosAgent {
   readonly id;
   readonly api: ForkosApi;
@@ -100,9 +108,20 @@ export class ForkosAgent {
 
   private async waitForJob(jobKey: string, until: (j: any) => boolean, timeoutMs = 300_000) {
     const start = Date.now();
+    let outage = false;
     for (;;) {
-      const j = await this.api.job(jobKey);
-      if (until(j)) return j;
+      try {
+        const j = await this.api.job(jobKey);
+        if (outage) this.log('job status available again');
+        outage = false;
+        if (until(j)) return j;
+      } catch (err) {
+        // A Hedera Mirror Node outage reaches us as a 5xx from the API (or a network error). Ride it out until the
+        // normal timeout instead of crashing the whole run; a 4xx is a real error and stops immediately.
+        if (!isTransient(err)) throw err;
+        if (!outage) this.log('job status temporarily unavailable (Mirror Node?) — retrying', (err as Error).message.slice(0, 160));
+        outage = true;
+      }
       if (Date.now() - start > timeoutMs) throw new Error('timed out waiting for job');
       await new Promise((r) => setTimeout(r, 3000));
     }
