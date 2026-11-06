@@ -178,3 +178,38 @@ The job pipeline was exercised directly rather than left until a payment exists:
 `InputHashMismatch`, the real sample audio downloads and hashes correctly, Whisper + the summary model
 return a usable meeting summary in 7.6 s, and `outputHash` is deterministic over `{transcript, summary}`.
 `hcsSeq` is still 0 because nothing publishes to our topic until the API links an agent (P25).
+
+## P23 — API runs on port 4040 (not 4000)
+
+`127.0.0.1:4000` is held by an unrelated container on the dev machine (`peregrine-cube`), which shadowed our
+listener: requests to `localhost:4000` reached that app and returned an Express 404, even though Fastify
+reported itself listening. `API_PORT`, `API_PUBLIC_URL` and `FORKOS_API_URL` are now **4040**.
+
+**Frontend handoff note:** the API base URL is `http://localhost:4040`. Railway is unaffected (it injects
+`PORT`, and the code prefers it).
+
+`SAMPLE_AUDIO_URL` was added to `.env`/`.env.example` as P23 requires.
+
+Verified: `/v1/health` returns the bootstrapped topic and asset, `/v1/events` holds open with the right SSE
+headers and emits `: ping`, and removing `HUMAN_SALT` fails the boot with a readable
+`Invalid environment: HUMAN_SALT: Required`.
+
+## P24–P28 — World integration: everything but the phone tap is verified
+
+The device flow, the backend validation and every guard are exercised against the **live** World issuer.
+What cannot be automated is the human tapping approve in the World app, so the following are built and
+waiting on that one step: owner sign-in completing, budget-account creation, agent linking, and revoke.
+
+Verified without a phone:
+- `POST /v1/owner/login/start` returns a real `user_code` and `verification_uri_complete` from
+  `auth.world.org`, and the background worker polls it (status stays `PENDING`, not an error).
+- The `device_code` is stored only as AES-256-GCM `iv.tag.cipher`, never in plaintext.
+- `POST /v1/agents/link/start` rejects a `publicKeyHex` that does not derive the claimed `agentAddr`
+  (400) and a malformed key (400), and starts a real World flow for a matching pair. This is the check
+  that stops an agent claiming an address it does not hold the key for.
+- Every owner-protected route (`/v1/me`, `/v1/agents`, `/v1/policy` GET and PUT, revoke start) returns 401
+  without a session, and agent routes return 401 without an agent token.
+
+`services/api/test/approvals.test.ts` adds two cases beyond the doc's two: a `REVOKE` approval digest can
+never collide with an `OVERCAP` one, and the digest binds `fromEpoch`, so an approval to fire epoch 1
+cannot be replayed to fire epoch 2.
