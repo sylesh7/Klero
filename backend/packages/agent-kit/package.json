@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "dependencies": {
-    "@arkiv-network/sdk": "1.0.1",
     "@forkos/shared": "workspace:*",
     "@hiero-ledger/sdk": "2.90.1",
+    "@worldcoin/agentkit": "0.2.1",
     "viem": "^2.40.0",
     "zod": "^3.25.0"
   }

@@ -1,11 +1,10 @@
 import {
   DEFAULT_MIRROR_URL,
   loadDeployments,
+  providerAccountsOf,
   loadEnv,
-  zEvmAddr,
   zHederaId,
   zIntString,
-  zPrivHex,
 } from '@forkos/shared';
 import { z } from 'zod';
 
@@ -22,9 +21,6 @@ export const env = loadEnv({
   PROVIDER_ACCOUNT_ID: zHederaId,
   PROVIDER_ACCOUNT_KEY: z.string().min(10),
   PROVIDER_PUBLIC_URL: z.string().url(),
-  PROVIDER_ARKIV_KEY: zPrivHex,
-  API_ARKIV_ADDRESS: zEvmAddr,
-  ARKIV_ACCESS_KEY: z.string().min(1),
   OPENAI_API_KEY: z.string().min(1),
   OPENAI_MODEL: z.string().default('gpt-4.1-mini'),
   OPENAI_STT_MODEL: z.string().default('whisper-1'),
@@ -32,10 +28,15 @@ export const env = loadEnv({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  // World AgentKit (human-backed agents). off: ignored. verify: a header, if sent, must be valid (forged or
+  // replayed headers are refused); records the AgentBook human. require: only agents whose wallet is registered
+  // in World AgentBook are served.
+  PROVIDER_AGENTKIT: z.enum(['off', 'verify', 'require']).default('off'),
 });
 
 const dep = loadDeployments();
 export const OPERATOR_ID = dep.operatorId;
 export const PROVIDER_ACCOUNTS = Object.values(dep.providers).map((p) => p.accountId);
+export const PROVIDER_ACCOUNT_MAP = providerAccountsOf(dep.providers);
 export const ENDPOINT = `${env.PROVIDER_PUBLIC_URL.replace(/\/$/, '')}/v1/jobs`;
-if (Buffer.byteLength(ENDPOINT) > 128) throw new Error('PROVIDER_PUBLIC_URL too long for an Arkiv str (128 bytes)');
+if (Buffer.byteLength(ENDPOINT) > 256) throw new Error('PROVIDER_PUBLIC_URL too long for the HCS SERVICE message (256 bytes)');

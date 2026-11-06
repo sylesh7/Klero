@@ -5,7 +5,7 @@ import { portFrom } from '@forkos/shared';
 import Fastify from 'fastify';
 import { registerBaseline } from './baseline';
 import { env } from './config';
-import { serviceKey, startDirectoryRefresh } from './directory';
+import { serviceSeq, startDirectoryRefresh } from './directory';
 import { follower } from './hcs';
 import { startReconciler } from './reconciler';
 import { registerJobRoutes } from './routes';
@@ -23,7 +23,7 @@ app.get('/health', async () => ({
   providerId: env.PROVIDER_ID,
   price: env.PROVIDER_PRICE,
   payTo: env.PROVIDER_ACCOUNT_ID,
-  arkivServiceKey: serviceKey,
+  serviceSeq, // HCS sequence number of our SERVICE announcement
   hcsSeq: follower.latestSeq,
 }));
 

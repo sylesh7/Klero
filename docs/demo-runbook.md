@@ -16,7 +16,7 @@
 |---|---|---|---|
 | 0:00–0:25 | "Your agent sent a payment and the Wi-Fi died. Did it pay? Nobody can answer that today." | — | title |
 | 0:25–1:05 | "Here's how agents pay today. Three agents, each with a wallet, same meeting." | **Run baseline** | **3 payments**, 3 HashScan links |
-| 1:05–1:50 | "Same three agents with ForkOS. One is Claude Desktop, two are scripts. They've never met — World ID knows they're the same human." | **Run ForkOS** (+ ask Claude Desktop to transcribe the same URL) | claims on Arkiv, HCS order picks one winner, **counter = 1**, read from Mirror Node |
+| 1:05–1:50 | "Same three agents with ForkOS. One is Claude Desktop, two are scripts. They've never met — World ID knows they're the same human." | **Run ForkOS** (+ ask Claude Desktop to transcribe the same URL) | claims on HCS, HCS order picks one winner, **counter = 1**, read from Mirror Node |
 | 1:50–2:40 | "Now try to make us pay twice." *Hand the laptop over.* | **Kill payer** on a new job | `PAYMENT_UNKNOWN`, death clock counts down, → PAID or VOID → counter still **1** |
 | 2:40–3:10 | "Replay the old payment." / "Revive a fired agent." | **Replay**; revoke an agent on the phone, then **Revive** | `forkos_replay_detected`; provider `409 STALE_AUTHORITY` |
 | 3:10–3:35 | "Expensive service? A human approves that exact payment." | buy from scribe-premium | World approval on phone → paid; the same approval replayed on another job is refused |

@@ -1,7 +1,7 @@
 # ForkOS — the exactly-once layer for AI agent payments
 
 > **Agents fork. Money doesn't.**
-> ETHGlobal Mumbai 2026 · Hedera · World ID · Arkiv
+> ETHGlobal Mumbai 2026 · Hedera · World ID
 
 Your agent sent a payment and the connection dropped. **Did it pay?**
 
@@ -73,21 +73,20 @@ The intent is written to disk **before** it is sent. Retries resend the identica
 
 | # | Safeguard | Enforced by | Where |
 |---|---|---|---|
-| S1 | Only a linked agent of *this* human can act for them | World ID device flow + Arkiv `AgentLink` + HCS `LINK` | `services/api/src/world.ts`, `agents.ts` |
+| S1 | Only a linked agent of *this* human can act for them | World ID device flow + HCS `LINK` | `services/api/src/world.ts`, `agents.ts` |
 | S2 | One winner per job round, decided publicly | HCS consensus order | `packages/shared/src/referee.ts` |
 | S3 | Agents never hold payment keys; the payer signs only for the HCS winner, within policy | API payer + row lock | `services/api/src/payer.ts` |
 | S4 | A payment settles **at most once, ever**; unknown outcomes resolve to PAID or provably VOID | Hedera tx-id dedupe + expiry, Mirror Node, facilitator replay table | `packages/x402-hedera`, `services/facilitator` |
-| S5 | A provider runs a job only for the live winner with current authority, after settlement | Fence reading Arkiv + HCS | `services/provider/src/fence.ts` |
+| S5 | A provider runs a job only for the live winner with current authority, after settlement | Fence reading HCS (winner + live link/epoch) | `services/provider/src/fence.ts` |
 | S6 | Fire/replace and over-cap spending need a fresh human approval bound to that exact action | World ID step-up + action digest | `services/api/src/approvals.ts` |
 
 ## How one job runs
 
 ```text
-discover services ────────────────────────────────▶ Arkiv (forkos.service.v1)
+discover services ────────────────────────────────▶ HCS SERVICE announcements (registered provider accounts)
 jobKey = sha256(humanHash | capability | inputHash)   same for every agent of one human
-post Claim ───────────────────────────────────────▶ Arkiv (owned by the agent's own wallet)
 submit CLAIM ─────────────────────────────────────▶ HCS seq 41    ← consensus order is the referee
-   (another agent's claim lands at seq 42 and loses; its claim expires in 30 s)
+   (another agent's claim lands at seq 42 and loses; it waits for the winner's result)
 POST /v1/pay ──▶ check winner + epoch + policy
                  build intent (tx id known, 120 s clock), STORE IT, publish INTENT
                  provider: fence → verify → settle → re-fence → run
@@ -106,7 +105,7 @@ receives the winner's result.
 | Requirement | Where |
 |---|---|
 | x402-protected endpoint settling on Hedera testnet | `services/provider/src/routes.ts` → `services/facilitator` (our own facilitator) |
-| An agent that **finds** the endpoint and pays end to end, no human | Arkiv directory → `packages/agent-kit/src/agent.ts`; under-cap payments have zero human steps |
+| An agent that **finds** the endpoint and pays end to end, no human | HCS service directory → `packages/agent-kit/src/agent.ts`; under-cap payments have zero human steps |
 | Hedera tx id of a settled payment | table above + [`docs/proof.md`](docs/proof.md) |
 | Extra: spending controls + human approval above an amount | `services/api/src/policy.ts`, `approvals.ts` |
 | Extra: HCS as a tamper-evident spending log | topic `0.0.11332888`, every event published |
@@ -129,22 +128,20 @@ with `iss`, `aud`, `exp` and `auth_time` freshness; step-ups pin the owner's `su
 rest and never leave the backend. Denied, expired, cancelled, wrong-human and replayed-approval paths are in
 [`docs/world-debrief.md`](docs/world-debrief.md).
 
-### Arkiv
-
-[`arkiv/schema.md`](backend/arkiv/schema.md) · [`how-you-use-arkiv.md`](backend/arkiv/how-you-use-arkiv.md) ·
-[`why-arkiv.md`](backend/arkiv/why-arkiv.md) · [`reach.md`](backend/arkiv/reach.md) ·
-[`friction.md`](backend/arkiv/friction.md)
-
-Three schemas on Rabdi (chain `7794095`): the **service directory** agents read to find endpoints, the
-**agent links** providers check for current authority, and the **claims** — each owned by the agent's own wallet,
-so no one can forge one — which expire on their own and make the board self-cleaning.
+**World AgentKit (human-backed agents) on the x402 path.** The provider's `402` carries the standard
+`extensions.agentkit` challenge. The winning agent signs it (SIWE on World Chain) with its own key — the same key as
+its Hedera account — and the API relays the `agentkit` header without ever holding agent keys. Before anything is
+settled, the provider fence verifies the signature is fresh, single-use, issued by that provider and made by the
+winning agent, then looks the wallet up in World **AgentBook**. `PROVIDER_AGENTKIT=off | verify | require`
+(`require` serves only agents registered to a human). Code: `services/provider/src/agentkit.ts`,
+`packages/agent-kit/src/agentkit.ts`.
 
 ## Run it
 
 ```bash
 cd backend
 pnpm install
-cp .env.example .env            # fill OPERATOR_*, ARKIV_ACCESS_KEY, WORLD_*, OPENAI_API_KEY
+cp .env.example .env            # fill OPERATOR_*, WORLD_*, OPENAI_API_KEY
 pnpm keys:new                   # generates the wallet keys and secrets
 pnpm db:up && pnpm db:migrate
 pnpm bootstrap:hedera           # creates accounts, the FUSD token and the HCS topic

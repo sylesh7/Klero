@@ -17,7 +17,7 @@
 <text x="330" y="421" text-anchor="middle" font-family="Courier New, monospace" font-size="22" fill="#222">WORLD ID LINK</text>
 <path d="M330 444 V500" stroke="#D3FB43" stroke-width="5" stroke-linecap="round"/>
 <rect x="40" y="500" width="580" height="170" fill="#434343"/>
-<text x="64" y="552" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#BDBDBD">Arkiv agent link</text>
+<text x="64" y="552" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#BDBDBD">HCS agent link</text>
 <text x="64" y="606" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="38" fill="#fff">Claude Desktop</text>
 <rect x="430" y="574" width="166" height="48" fill="#D3FB43"/>
 <text x="513" y="607" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="22" fill="#1F1F21">ACTIVE  ✓</text>

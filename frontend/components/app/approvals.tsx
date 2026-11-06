@@ -113,7 +113,7 @@ export function ApprovalProvider({ children }: { children: ReactNode }) {
             <StepList steps={[
               { label: 'Request created', state: 'done' },
               { label: 'Human approves in World App', state: cur.status === 'PENDING' ? 'active' : 'done', icon: Fingerprint },
-              { label: cur.kind === 'REVOKE' ? 'REVOKE on HCS · Arkiv link → REVOKED' : 'Payment continues', state: cur.status === 'PENDING' ? 'todo' : 'done', icon: BadgeCheck },
+              { label: cur.kind === 'REVOKE' ? 'REVOKE on HCS · providers refuse the agent' : 'Payment continues', state: cur.status === 'PENDING' ? 'todo' : 'done', icon: BadgeCheck },
             ]} />
             <button className="btn ghost block" onClick={cancel}>{cur.kind === 'OVERCAP' ? 'Deny this payment' : 'Deny this request'}</button>
           </>

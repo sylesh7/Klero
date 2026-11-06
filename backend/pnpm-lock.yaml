@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@arkiv-network/sdk':
-        specifier: 1.0.1
-        version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))
       '@forkos/shared':
         specifier: workspace:^
         version: link:packages/shared
@@ -110,15 +107,15 @@ importers:
 
   packages/agent-kit:
     dependencies:
-      '@arkiv-network/sdk':
-        specifier: 1.0.1
-        version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))
       '@forkos/shared':
         specifier: workspace:*
         version: link:../shared
       '@hiero-ledger/sdk':
         specifier: 2.90.1
         version: 2.90.1
+      '@worldcoin/agentkit':
+        specifier: 0.2.1
+        version: 0.2.1(typescript@5.9.3)
       viem:
         specifier: ^2.40.0
         version: 2.57.16(typescript@5.9.3)(zod@3.25.76)
@@ -128,9 +125,6 @@ importers:
 
   packages/shared:
     dependencies:
-      '@arkiv-network/sdk':
-        specifier: 1.0.1
-        version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))
       '@hiero-ledger/sdk':
         specifier: 2.90.1
         version: 2.90.1
@@ -158,9 +152,6 @@ importers:
 
   services/api:
     dependencies:
-      '@arkiv-network/sdk':
-        specifier: 1.0.1
-        version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))
       '@fastify/cors':
         specifier: ^11.0.0
         version: 11.4.1
@@ -221,9 +212,6 @@ importers:
 
   services/provider:
     dependencies:
-      '@arkiv-network/sdk':
-        specifier: 1.0.1
-        version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))
       '@fastify/static':
         specifier: ^8.2.0
         version: 8.3.0
@@ -233,6 +221,9 @@ importers:
       '@hiero-ledger/sdk':
         specifier: 2.90.1
         version: 2.90.1
+      '@worldcoin/agentkit':
+        specifier: 0.2.1
+        version: 0.2.1(typescript@5.9.3)
       '@x402/core':
         specifier: 2.30.0
         version: 2.30.0
@@ -265,16 +256,6 @@ packages:
 
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
-
-  '@arkiv-network/sdk@1.0.1':
-    resolution: {integrity: sha512-DCOFdGunn4I5nYrvIV/YIkMCkLZM7EQNSyNPtqpmQkP2JzTEfRLBJleBSB2rokWMa833/9P8DMiwsEXACr3CUQ==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      typescript: '>=5.0.0'
-      viem: ^2.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   '@esbuild/aix-ppc64@0.28.2':
     resolution: {integrity: sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==}
@@ -791,6 +772,12 @@ packages:
   '@vitest/utils@3.2.7':
     resolution: {integrity: sha512-x6BDOd7dyo3PFLY3I9/HJ25X/6OurhGXk2/B9gOZNPF7XDVjeBK4k01lQE5uvDpbuheErh91qYuE1E2OEjK3Rw==}
 
+  '@worldcoin/agentkit-core@0.2.1':
+    resolution: {integrity: sha512-gfZf/GOP7DB8DVpXJZlYE58ZovrQrUezQ970NVd/oKu+XkwjY3CuLU3o304D4lrv5tdY4mqlhVroi6bELa3Meg==}
+
+  '@worldcoin/agentkit@0.2.1':
+    resolution: {integrity: sha512-UTq4BBBTP1bt2wfrxuIAMAJaqByR5neBb7TESJfSXDfFGETItm5kp+2MMqYFS32xG4xuRVk4BZw06cToemKgGw==}
+
   '@x402/core@2.30.0':
     resolution: {integrity: sha512-gvMxCum2QlNI6jI/3NL1jdrmOgtX9sWEWxSIOmeI67/5ndOJvYOtP7JZLSO8o8af+O+A+Vhhjza1NCda0yVppg==}
 
@@ -965,6 +952,7 @@ packages:
 
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
   dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
@@ -1852,12 +1840,6 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
 
-  '@arkiv-network/sdk@1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))':
-    dependencies:
-      viem: 2.57.16(typescript@5.9.3)(zod@3.25.76)
-    optionalDependencies:
-      typescript: 5.9.3
-
   '@esbuild/aix-ppc64@0.28.2':
     optional: true
 
@@ -2284,6 +2266,28 @@ snapshots:
       '@vitest/pretty-format': 3.2.7
       loupe: 3.2.1
       tinyrainbow: 2.0.0
+
+  '@worldcoin/agentkit-core@0.2.1(typescript@5.9.3)':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@scure/base': 1.2.6
+      viem: 2.57.16(typescript@5.9.3)(zod@3.25.76)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - bufferutil
+      - mppx
+      - typescript
+      - utf-8-validate
+
+  '@worldcoin/agentkit@0.2.1(typescript@5.9.3)':
+    dependencies:
+      '@worldcoin/agentkit-core': 0.2.1(typescript@5.9.3)
+      '@x402/core': 2.30.0
+    transitivePeerDependencies:
+      - bufferutil
+      - mppx
+      - typescript
+      - utf-8-validate
 
   '@x402/core@2.30.0':
     dependencies:

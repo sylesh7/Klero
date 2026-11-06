@@ -1,4 +1,4 @@
-import { DEFAULT_MIRROR_URL, loadDeployments, loadEnv, zHederaId, zIntString, zPrivHex } from '@forkos/shared';
+import { DEFAULT_MIRROR_URL, loadDeployments, loadEnv, zHederaId, zIntString } from '@forkos/shared';
 import { z } from 'zod';
 
 const hex32 = z.string().regex(/^[0-9a-f]{64}$/, 'expected 64 hex chars (32 bytes)');
@@ -12,9 +12,6 @@ export const env = loadEnv({
   PAY_ASSET_DECIMALS: z.coerce.number().int().min(0).max(18),
   HCS_TOPIC_ID: zHederaId,
   FACILITATOR_URL: z.string().url(),
-  ARKIV_ACCESS_KEY: z.string().min(1),
-  API_ARKIV_KEY: zPrivHex,
-  AGENT_ARKIV_FUND_WEI: zIntString.default('50000000000000000'),
   AGENT_HBAR_FUND: z.coerce.number().positive().default(5),
   HUMAN_FUSD_FUND: zIntString.default('20000000'),
   HUMAN_HBAR_FUND: z.coerce.number().positive().default(2),

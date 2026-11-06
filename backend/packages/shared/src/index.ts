@@ -8,4 +8,4 @@ export * from './mirror';
 export * from './deployments';
 export * from './hcs';
 export * from './referee';
-export * from './arkiv';
+export * from './directory';

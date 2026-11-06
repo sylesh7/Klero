@@ -11,7 +11,6 @@ const otherHuman = '3'.repeat(64);
 const A = '0x' + 'a'.repeat(40);
 const B = '0x' + 'b'.repeat(40);
 const C = '0x' + 'c'.repeat(40);
-const ak = '0x' + 'e'.repeat(64);
 const TX0 = '0.0.300@1793909236.000000000';
 const TX1 = '0.0.300@1793909500.000000000';
 const TX2 = '0.0.300@1793909900.000000000';
@@ -21,7 +20,7 @@ const at = (payer: string, msg: HcsMessage): Decoded => ({ seq: ++seq, payer, ct
 const link = (agent: string, acct: string, epoch = 1, h = human) =>
   at(OP, { v: 1, t: 'LINK', human: h, agent, acct, epoch });
 const claim = (agent: string, payer: string, round = 0, epoch = 1, h = human, j = job) =>
-  at(payer, { v: 1, t: 'CLAIM', job: j, round, human: h, agent, epoch, svc: 'scribe-a', price: '50000', ak });
+  at(payer, { v: 1, t: 'CLAIM', job: j, round, human: h, agent, epoch, svc: 'scribe-a', price: '50000' });
 const intent = (agent: string, tx: string, round = 0) =>
   at(OP, { v: 1, t: 'INTENT', job, round, agent, tx, dl: 1793909356, amt: '50000', asset: '0.0.7', payTo: '0.0.8' });
 const settled = (tx: string, round = 0, payer = OP) =>

@@ -1,6 +1,6 @@
-import { listClaims, listServices, viewJob, type JobView } from '@forkos/shared';
+import { viewJob, type JobView } from '@forkos/shared';
 import { REFEREE } from './config';
-import { arkivPub, follower } from './clients';
+import { follower, services } from './clients';
 import { sql, type IntentRow } from './db';
 
 export async function jobView(jobKey: string): Promise<JobView> {
@@ -33,14 +33,9 @@ export async function latestIntent(jobKey: string) {
   return i ?? null;
 }
 
+/** Service directory from HCS SERVICE announcements (registered provider accounts only). */
 export async function directory() {
-  const rows = await listServices(arkivPub);
-  return rows.map((s) => ({ ...s, price: s.price.toString(), expiresAt: s.expiresAt.toString() }));
-}
-
-export async function board(jobKey: string) {
-  const rows = await listClaims(arkivPub, jobKey);
-  return rows.map((c) => ({ ...c, price: c.price.toString(), expiresAt: c.expiresAt.toString() }));
+  return (await services()).map((s) => ({ ...s, price: s.price.toString() }));
 }
 
 export async function timeline(jobKey: string) {

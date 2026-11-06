@@ -7,7 +7,6 @@ const hex64 = z.string().regex(/^[0-9a-f]{64}$/);
 const addr = z.string().regex(/^0x[0-9a-f]{40}$/);
 const hid = z.string().regex(/^0\.0\.\d+$/);
 const sdkTx = z.string().regex(/^0\.0\.\d+@\d+\.\d{9}$/);
-const arkivKey = z.string().regex(/^0x[0-9a-f]{64}$/);
 const round = z.number().int().nonnegative();
 const units = z.string().regex(/^\d+$/);
 const v = z.literal(1);
@@ -25,7 +24,20 @@ export const HcsMessage = z.discriminatedUnion('t', [
     epoch: z.number().int().positive(),
     svc: z.string().min(1).max(32),
     price: units,
-    ak: arkivKey,
+    // (older CLAIMs also carried `ak`, an Arkiv claim key; zod strips it, so history still decodes)
+  }),
+  // Service directory entry, submitted by the provider's own account. Only trusted when the payer is the
+  // provider account registered in deployments (see directory.ts) — so nobody can list a fake provider.
+  z.object({
+    v,
+    t: z.literal('SERVICE'),
+    svc: z.string().min(1).max(32),
+    cap: z.string().min(1).max(64),
+    name: z.string().min(1).max(64),
+    price: units,
+    asset: hid,
+    payTo: hid,
+    url: z.string().url().max(256),
   }),
   z.object({
     v,

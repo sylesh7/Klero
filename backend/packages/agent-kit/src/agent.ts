@@ -1,22 +1,16 @@
 import {
-  CLAIM_WINDOW_S,
-  ClaimSchema,
-  ExpirationTime,
-  Mirror,
-  TopicFollower,
-  WINNER_HOLD_S,
-  arkivPublic,
-  arkivWallet,
   clientFor,
+  directoryFrom,
   inputHashOf,
   jobKeyOf,
-  listServices,
+  Mirror,
   publishHcs,
-  u64,
+  TopicFollower,
   viewJob,
   type JobView,
   type ServiceRow,
 } from '@forkos/shared';
+import { agentkitClient, agentkitHeaderFor } from './agentkit';
 import { ForkosApi } from './api';
 import { agentIdentity } from './identity';
 
@@ -24,7 +18,6 @@ export type AgentOptions = {
   key: `0x${string}`;
   token: string;
   apiUrl: string;
-  arkivAccessKey: string;
   mirrorUrl?: string;
   log?: (msg: string, extra?: unknown) => void;
   onApproval?: (info: { approvalId: string; userCode?: string; verificationUriComplete?: string }) => void;
@@ -42,15 +35,13 @@ export class ForkosAgent {
   private me!: Awaited<ReturnType<ForkosApi['me']>>;
   private follower!: TopicFollower;
   private hedera!: ReturnType<typeof clientFor>;
-  private pub;
-  private wallet;
   private log: NonNullable<AgentOptions['log']>;
+  private readonly agentkit;
 
   constructor(private readonly opts: AgentOptions) {
     this.id = agentIdentity(opts.key);
     this.api = new ForkosApi(opts.apiUrl, opts.token);
-    this.pub = arkivPublic(opts.arkivAccessKey);
-    this.wallet = arkivWallet(opts.arkivAccessKey, opts.key);
+    this.agentkit = agentkitClient(opts.key);
     this.log = opts.log ?? ((m, e) => console.log(`[${this.id.address.slice(0, 8)}] ${m}`, e ?? ''));
   }
 
@@ -71,8 +62,11 @@ export class ForkosAgent {
     return viewJob(this.follower.messages, jobKey, this.referee());
   }
 
+  /** Service directory from the HCS topic: SERVICE announcements by the registered provider accounts only. */
   async discover(): Promise<ServiceRow[]> {
-    return listServices(this.pub);
+    await this.follower.sync();
+    const providers = Object.fromEntries((this.cfg.providers as { id: string; payTo: string }[]).map((p) => [p.id, p.payTo]));
+    return directoryFrom(this.follower.messages, providers);
   }
 
   async jobFor(audioUrl: string) {
@@ -81,26 +75,10 @@ export class ForkosAgent {
     return { audioUrl, inputHash, jobKey: jobKeyOf(this.me.humanHash, inputHash) };
   }
 
-  /** Posts a claim (Arkiv, owned by me) + CLAIM (HCS, paid by my account) and reads the referee. */
+  /** Posts a CLAIM on HCS (paid by my own account) and reads the referee: first valid claim wins. */
   async claim(jobKey: string, svc: ServiceRow) {
     const before = await this.view(jobKey);
     const round = before.round;
-    const entity = await this.wallet.createEntity(
-      ClaimSchema,
-      {
-        job: jobKey,
-        round: u64(round),
-        human: this.me.humanHash,
-        agent: this.id.address,
-        status: 'OPEN',
-        epoch: u64(this.me.epoch),
-        svc: svc.providerId,
-        price: u64(svc.price),
-        seq: u64(0),
-        tx: '-',
-      },
-      { expiration: ExpirationTime.fromSeconds(CLAIM_WINDOW_S) },
-    );
     const { seq } = await publishHcs(this.hedera, this.cfg.topicId, {
       v: 1,
       t: 'CLAIM',
@@ -111,21 +89,13 @@ export class ForkosAgent {
       epoch: this.me.epoch,
       svc: svc.providerId,
       price: svc.price.toString(),
-      ak: entity.entityKey.toLowerCase(),
     });
     this.log(`claimed round ${round} via ${svc.providerId} (HCS seq ${seq})`);
     await this.follower.syncThrough(seq);
     const view = viewJob(this.follower.messages, jobKey, this.referee());
     const won = view.winner?.seq === seq;
-    const key = entity.entityKey;
-    if (won) {
-      await this.wallet.patchEntity(ClaimSchema, key, { set: { status: 'WON', seq: u64(seq) } });
-      await this.wallet.extendEntity({ entityKey: key, expiration: ExpirationTime.atDate(new Date(Date.now() + WINNER_HOLD_S * 1000)) });
-    } else {
-      await this.wallet.patchEntity(ClaimSchema, key, { set: { status: 'LOST', seq: u64(seq) } });
-    }
     this.log(won ? `WON (seq ${seq})` : `lost to seq ${view.winner?.seq} (${view.claims.find((c) => c.seq === seq)?.reason ?? 'later'})`);
-    return { won, round, seq, claimKey: key, view };
+    return { won, round, seq, view };
   }
 
   private async waitForJob(jobKey: string, until: (j: any) => boolean, timeoutMs = 300_000) {
@@ -154,19 +124,22 @@ export class ForkosAgent {
         if (j.round > c.round) continue; // winner's payment was proven VOID → next round
         return { kind: 'PAID_BY_OTHER', jobKey: job.jobKey, round: j.round, result: j.intent?.result, winner: c.view.winner?.agent ?? '' };
       }
-      const out = await this.payLoop(job, c.round, c.claimKey);
+      const out = await this.payLoop(job, c.round, svc);
       if (out) return out;
     }
     return { kind: 'FAILED', jobKey: job.jobKey, reason: 'too many rounds' };
   }
 
-  private async payLoop(job: { jobKey: string; audioUrl: string; inputHash: string }, round: number, claimKey: `0x${string}`): Promise<BuyOutcome | null> {
+  private async payLoop(job: { jobKey: string; audioUrl: string; inputHash: string }, round: number, svc: ServiceRow): Promise<BuyOutcome | null> {
     for (;;) {
-      const r = await this.api.pay({ jobKey: job.jobKey, round, audioUrl: job.audioUrl, inputHash: job.inputHash });
+      // World AgentKit: a fresh signed proof per call (challenges are single-use and live 5 min; approvals can take longer)
+      const agentkit = await agentkitHeaderFor(this.agentkit, svc, job, round, this.id.address).catch((err) => {
+        this.log('agentkit proof skipped', String(err));
+        return undefined;
+      });
+      const r = await this.api.pay({ jobKey: job.jobKey, round, audioUrl: job.audioUrl, inputHash: job.inputHash, agentkit });
       const status = r.body?.status;
       if (r.http === 200) {
-        await this.wallet.patchEntity(ClaimSchema, claimKey, { set: { status: 'PAID', tx: String(r.body.intent?.txId ?? '-') } });
-        await this.wallet.extendEntity({ entityKey: claimKey, expiration: ExpirationTime.atDate(new Date(Date.now() + 86_400_000)) });
         return { kind: 'PAID_BY_ME', jobKey: job.jobKey, round, result: r.body.result, intent: r.body.intent };
       }
       if (r.http === 202 && status === 'APPROVAL_REQUIRED') {
@@ -177,10 +150,8 @@ export class ForkosAgent {
       }
       if (r.http === 202) {
         this.log(`payment ${status} → waiting for the resolver (death clock)`);
-        await this.wallet.patchEntity(ClaimSchema, claimKey, { set: { status: 'PAYING', tx: String(r.body.intent?.txId ?? '-') } });
         const j = await this.waitForJob(job.jobKey, (x) => ['DONE', 'REFUNDED', 'PAID'].includes(x.status) || x.round > round);
         if (j.round > round) {
-          await this.wallet.patchEntity(ClaimSchema, claimKey, { set: { status: 'VOID' } });
           this.log('proven VOID → next round');
           return null;
         }

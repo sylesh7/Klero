@@ -11,6 +11,9 @@ const Body = z.object({
   round: z.number().int().nonnegative(),
   audioUrl: z.string().url(),
   inputHash: z.string().regex(/^sha256:[0-9a-f]{64}$/),
+  // World AgentKit: the agent's own signed `agentkit` header (SIWE over the provider's challenge). The payer only
+  // relays it — agents keep their keys; the provider verifies it against World AgentBook.
+  agentkit: z.string().min(1).max(4096).optional(),
 });
 
 export function registerPayRoutes(app: FastifyInstance) {

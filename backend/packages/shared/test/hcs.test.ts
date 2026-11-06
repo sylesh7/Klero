@@ -18,10 +18,31 @@ describe('hcs codec', () => {
       epoch: 1,
       svc: 'scribe-b',
       price: '40000',
-      ak: '0x' + 'd'.repeat(64),
     };
     const b64 = Buffer.from(encodeHcs(msg)).toString('base64');
     expect(decodeHcs(b64)).toEqual(msg);
+  });
+
+  it('still decodes legacy CLAIMs that carried an Arkiv key (field is stripped)', () => {
+    const legacy = { v: 1, t: 'CLAIM', job, round: 0, human, agent, epoch: 1, svc: 'scribe-b', price: '40000', ak: '0x' + 'd'.repeat(64) };
+    const decoded = decodeHcs(Buffer.from(JSON.stringify(legacy)).toString('base64'));
+    expect(decoded?.t).toBe('CLAIM');
+    expect(decoded && 'ak' in decoded).toBe(false);
+  });
+
+  it('round-trips a SERVICE announcement', () => {
+    const msg = {
+      v: 1 as const,
+      t: 'SERVICE' as const,
+      svc: 'scribe-a',
+      cap: 'transcribe+summarize.v1',
+      name: 'Scribe A',
+      price: '50000',
+      asset: '0.0.7',
+      payTo: '0.0.8',
+      url: 'http://localhost:4031/v1/jobs',
+    };
+    expect(decodeHcs(Buffer.from(encodeHcs(msg)).toString('base64'))).toEqual(msg);
   });
 
   it('rejects unknown shapes and non-JSON', () => {

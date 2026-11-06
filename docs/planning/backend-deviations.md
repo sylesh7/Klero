@@ -289,3 +289,46 @@ undici's 300 s `headersTimeout` and the winning agent crashed (`UND_ERR_HEADERS_
 both after the payment had already completed. Each request now has a 15 s deadline and up to 3 attempts with
 backoff for network errors, timeouts and 5xx. **404 and other 4xx are never retried**: a 404 is an answer, and
 the VOID proof rests on it. Options are `new Mirror(url, { timeoutMs, attempts, retryDelayMs })`.
+
+## Arkiv removed — HCS carries the directory, claims and agent links
+
+The project now uses two partners, Hedera and World. Everything Arkiv did is on the HCS topic (which was
+already the source of truth for the referee and the agent links):
+
+- **Service directory** → new HCS `SERVICE` message, submitted by each provider's own account on boot (skipped
+  when the latest announcement is unchanged). `directoryFrom()` (`packages/shared/src/directory.ts`) lists an
+  entry only when the message payer **and** its `payTo` are the provider account registered in
+  `deployments/testnet.json`. This also fixes a spoofing gap: the Arkiv directory accepted entries from any wallet,
+  so anyone could have listed a fake "scribe-a" with their own payout account.
+- **Claims** → the HCS `CLAIM` alone. The `ak` field and the `X-ForkOS-Claim` header are gone; legacy CLAIMs that
+  still carry `ak` decode unchanged (zod strips the field), so the audit over the existing topic still passes.
+- **Agent links** → HCS `LINK`/`REVOKE` only. The API no longer writes AgentLink entities or funds agent wallets
+  with tGLM. `agents.arkiv_key` dropped (migration 003).
+- **Provider fence** → F1–F3 (round, status, HCS winner) + HCS link/epoch. The Arkiv claim (old F4) and Arkiv
+  link (old F6) checks were duplicates of HCS state.
+- Removed: `/v1/board` and the race page's Arkiv claim board (the HCS referee log shows every claim),
+  `@arkiv-network/sdk`, `smoke:arkiv`, `backend/arkiv/`, all Arkiv env vars.
+
+Verified live: providers announced on HCS (seq 71–73), `/v1/directory` reads from HCS, a 3-agent race paid once
+(job `8c4e2a22…`, round 0), and `forkos audit` passed 9 jobs / 34 checks over the full topic history. 124 tests.
+
+## World AgentKit — human-backed agents on the x402 path (new)
+
+Not in the build doc. World's AgentKit extends x402 so a resource can tell human-backed agents from bots: the agent
+signs a SIWE challenge and the server resolves its wallet in World **AgentBook** (World Chain). Integrated without
+touching how payments settle:
+
+- **Provider** (`services/provider/src/agentkit.ts`): the fenced `402` carries `extensions.agentkit`
+  (`declareAgentkitExtension` + `enrichPaymentRequiredResponse`, network `eip155:480`, 5-min expiry, nonce tracked
+  as issued). On the paid request the fence checks the relayed `agentkit` header — message bound to this endpoint,
+  fresh, nonce issued here and unused, signature recovers the HCS winner — then `lookupHuman`. Modes via
+  `PROVIDER_AGENTKIT`: `off` (default), `verify` (a sent header must be valid; records the human), `require`
+  (unregistered or missing → `409 NOT_HUMAN_BACKED`). The extension is **not** registered on `x402ResourceServer`,
+  so it never participates in payment verification. Result is recorded on `prov_jobs.agentkit_*` and returned in the
+  job response.
+- **Agent** (`packages/agent-kit/src/agentkit.ts`): before each `/v1/pay` the winner fetches the provider's challenge
+  and signs it with its own key (same secp256k1 key as its Hedera account); a fresh proof per call because approvals
+  can outlast the 5-minute challenge.
+- **API**: `/v1/pay` accepts `agentkit`, stores it on the intent (`intents.agentkit_header`) and relays it on the paid
+  request. The API never signs and holds no agent keys.
+- Registration is a human step: `npx @worldcoin/agentkit-cli register <agent address>` + World App.

@@ -47,7 +47,7 @@ export default function About() {
               <div className="home-about-content-wrap">
                 <div fade-anim="True" className="home-about-content-title-box">
                   <div className="home-about-content-title">
-                    {"The exactly-once layer for AI agent payments\u2028built on Hedera, World ID and Arkiv\u2028"}
+                    {"The exactly-once layer for AI agent payments\u2028built on Hedera and World ID\u2028"}
                     <br />
                     One job, one winner, one payment
                   </div>

@@ -106,14 +106,14 @@ export default function Process() {
                       <div className="process-tabs-contents-box">
                         <div className="process-tabs-contents-tags-flex">
                           <div className="process-tabs-contents-tags">
-                            Arkiv
+                            Job key
                           </div>
                           <div className="process-tabs-contents-tags">
                             HCS
                           </div>
                         </div>
                         <p className="process-contents-description">
-                          Every agent computes the same job key from your human id, the capability and the input hash, then posts a claim: an Arkiv entity owned by its own wallet and a message on the HCS topic.
+                          Every agent computes the same job key from your human id, the capability and the input hash, then posts a claim on the HCS topic, paid by its own Hedera account.
                         </p>
                       </div>
                     </div>
@@ -200,7 +200,7 @@ export default function Process() {
                           </div>
                         </div>
                         <p className="process-contents-description">
-                          The provider checks Arkiv and HCS, settles through our x402 facilitator in FUSD, then runs the job. If the job fails it refunds in HTS. Unknown outcomes resolve to PAID or VOID.
+                          The provider checks HCS, settles through our x402 facilitator in FUSD, then runs the job. If the job fails it refunds in HTS. Unknown outcomes resolve to PAID or VOID.
                         </p>
                       </div>
                     </div>

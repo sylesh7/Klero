@@ -66,7 +66,6 @@ export const api = {
   counter: (jobKey: string, since: number) => call('GET', `/v1/counter?jobKey=${q(jobKey)}&since=${since}`, T.zCounter),
 
   directory: () => call('GET', '/v1/directory', T.zDirectory),
-  board: (jobKey: string) => call('GET', `/v1/board?jobKey=${q(jobKey)}`, T.zBoard),
   timeline: (jobKey: string) => call('GET', `/v1/timeline?jobKey=${q(jobKey)}`, T.zTimeline),
 
   demoJob: () => call('POST', '/v1/demo/job', T.zDemoJob, { auth: 'demo', body: {} }),

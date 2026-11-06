@@ -38,6 +38,16 @@ Three protected actions, each validated entirely in the backend:
 3. **Spend above the autonomous cap.** The approval digest covers job, round, provider, payTo, amount and asset,
    and is consumed in the same database transaction that writes the payment intent.
 
+4. **Human-backed agents on the payment path (World AgentKit).** The provider's x402 `402` response carries the
+   standard `extensions.agentkit` challenge (World Chain, single-use nonce, 5-minute lifetime). The winning agent
+   signs it with its own key and the API relays the header. The provider fence, before any money moves, checks the
+   message (target, freshness, a nonce it issued and never saw), recovers the signer, requires it to be the HCS
+   winner, and resolves the wallet's anonymous human in World **AgentBook**. `PROVIDER_AGENTKIT=require` refuses any
+   agent whose wallet is not registered to a human (`409 NOT_HUMAN_BACKED`). AgentKit is deliberately not
+   registered as an x402 hook, so it can never change how a Hedera payment is verified or settled.
+   Live: a 3-agent race carried the proof agent → API → provider (header 748 bytes, signer = winner); 8 tests cover
+   replayed, foreign-challenge, wrong-wallet, malformed, unregistered and `require`-mode cases.
+
 Validation performed on every ID token (`services/api/src/world.ts`): RS256 signature against the issuer's JWKS,
 `iss`, `aud`, `exp`, `auth_time` present and fresh within `WORLD_FRESH_SECONDS`, and `auth_time` not earlier than
 the attempt started. Device codes are stored AES-256-GCM encrypted and never leave the backend.
@@ -89,7 +99,7 @@ humans 0 | agents 0 | agent_tokens 0 | owner_sessions 0
 operator balance unchanged (510.86 HBAR) -- no Hedera account was created or funded
 ```
 
-This is the important property: agent linking creates a Hedera account, funds an Arkiv wallet and publishes to
+This is the important property: agent linking creates a Hedera account and publishes to
 HCS, and **none of it happens** unless World returns a validated approval first. The side effects are strictly
 downstream of the `APPROVED` branch in `startWorldWorker`.
 

@@ -23,7 +23,7 @@ Logs land in `backend/.logs/`. The API is on **:4040** (not 4000 — another con
 | An intent never sent | resolver proved it **VOID** |
 | The baseline lane | **3 independent agents paid 3 times for one meeting** — the number ForkOS reduces to 1 |
 | Provider job pipeline | hash gate → Whisper → summary → deterministic output hash, 7.6 s on real audio |
-| Arkiv | 3 services discoverable by capability and price; a 30 s claim expired to zero rows on its own |
+| Directory | 3 services announced on HCS by their registered provider accounts (spoofed entries ignored) |
 
 Full raw output: [`docs/proof.md`](proof.md).
 

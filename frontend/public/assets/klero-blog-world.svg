@@ -4,16 +4,16 @@
 
 <circle cx="150" cy="128" r="74" fill="#2775ca"/>
 <circle cx="150" cy="128" r="60" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-dasharray="4 8"/>
-<text x="150" y="144" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="46" fill="#fff">S</text>
-<text x="150" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="22" fill="#fff">Service</text>
-<text x="150" y="262" text-anchor="middle" font-family="Courier New, monospace" font-size="14" fill="#9a9a9a">provider</text>
+<text x="150" y="144" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="46" fill="#fff">H</text>
+<text x="150" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="22" fill="#fff">Human</text>
+<text x="150" y="262" text-anchor="middle" font-family="Courier New, monospace" font-size="14" fill="#9a9a9a">one World ID</text>
 <circle cx="570" cy="128" r="74" fill="#0f9d9a"/>
 <circle cx="570" cy="128" r="60" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-dasharray="4 8"/>
-<text x="570" y="144" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="46" fill="#fff">C</text>
-<text x="570" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="22" fill="#fff">Claim</text>
-<text x="570" y="262" text-anchor="middle" font-family="Courier New, monospace" font-size="14" fill="#9a9a9a">agent</text>
+<text x="570" y="144" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="46" fill="#fff">A</text>
+<text x="570" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="22" fill="#fff">Agents</text>
+<text x="570" y="262" text-anchor="middle" font-family="Courier New, monospace" font-size="14" fill="#9a9a9a">Claude · script</text>
 <rect x="268" y="96" width="184" height="64" fill="#D3FB43"/>
-<text x="360" y="125" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="20" fill="#111">Arkiv</text>
-<text x="360" y="147" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#111">owned · expiring · public</text>
+<text x="360" y="125" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="20" fill="#111">World ID</text>
+<text x="360" y="147" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#111">one human · one budget</text>
 
 </svg>

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
   title: 'Klero — Agents fork. Money doesn’t.',
-  description: 'The exactly-once payment layer for AI agents. Hedera x402 · World ID Agent Pass · Arkiv.',
+  description: 'The exactly-once payment layer for AI agents. Hedera x402 · World ID Agent Pass.',
   icons: { apple: '/apple-touch-icon.png' },
 };
 export const viewport: Viewport = { themeColor: '#f1efe2', width: 'device-width', initialScale: 1 };

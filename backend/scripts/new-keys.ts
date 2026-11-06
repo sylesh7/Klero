@@ -1,4 +1,4 @@
-// Usage: pnpm keys:new            → prints 3 Arkiv wallets + 4 random secrets
+// Usage: pnpm keys:new            → prints an agent key + the API's random secrets
 //        pnpm keys:new agent      → prints one agent key (FORKOS_AGENT_KEY)
 import { randomBytes } from 'node:crypto';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
@@ -14,8 +14,6 @@ function wallet(label: string) {
 if (mode === 'agent') {
   wallet('FORKOS_AGENT_KEY');
 } else {
-  wallet('API_ARKIV_KEY');
-  wallet('PROVIDER_ARKIV_KEY');
   wallet('FORKOS_AGENT_KEY');
   for (const name of ['SESSION_SECRET', 'KEY_ENCRYPTION_SECRET', 'HUMAN_SALT']) {
     console.log(`${name}=${randomBytes(32).toString('hex')}`);

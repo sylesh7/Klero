@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { requireOwnerOrAgent } from '../auth';
 import { dep, env } from '../config';
 import { sql, type IntentRow } from '../db';
-import { board, directory, intentPublic, jobView, latestIntent, timeline } from '../views';
+import { directory, intentPublic, jobView, latestIntent, timeline } from '../views';
 
 export function registerJobRoutes(app: FastifyInstance) {
   app.get('/v1/config', async () => ({
@@ -35,6 +35,5 @@ export function registerJobRoutes(app: FastifyInstance) {
   });
 
   app.get('/v1/directory', async () => ({ services: await directory() }));
-  app.get<{ Querystring: { jobKey: string } }>('/v1/board', async (req) => ({ claims: await board(req.query.jobKey) }));
   app.get<{ Querystring: { jobKey: string } }>('/v1/timeline', async (req) => ({ events: await timeline(req.query.jobKey) }));
 }

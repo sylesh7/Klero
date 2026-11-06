@@ -38,7 +38,8 @@ export class ForkosApi {
   directory() {
     return this.ok<{ services: { providerId: string; name: string; price: string; endpoint: string; payTo: string; asset: string }[] }>('GET', '/v1/directory');
   }
-  pay(body: { jobKey: string; round: number; audioUrl: string; inputHash: string }) {
+  /** `agentkit`: optional World AgentKit header signed by this agent; the payer relays it to the provider. */
+  pay(body: { jobKey: string; round: number; audioUrl: string; inputHash: string; agentkit?: string }) {
     return this.call('POST', '/v1/pay', body);
   }
   demoJob(demoKey: string) {

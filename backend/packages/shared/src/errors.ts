@@ -6,6 +6,7 @@ export type ErrorCode =
   | 'NOT_WINNER'
   | 'ROUND_CLOSED'
   | 'STALE_AUTHORITY'
+  | 'NOT_HUMAN_BACKED'
   | 'ALREADY_EXECUTED'
   | 'APPROVAL_MISMATCH'
   | 'POLICY_DENIED'
@@ -22,6 +23,7 @@ const STATUS: Record<ErrorCode, number> = {
   NOT_WINNER: 409,
   ROUND_CLOSED: 409,
   STALE_AUTHORITY: 409,
+  NOT_HUMAN_BACKED: 409, // World AgentKit: agent wallet not proven human-backed (provider fence)
   ALREADY_EXECUTED: 409,
   APPROVAL_MISMATCH: 409,
   POLICY_DENIED: 402,

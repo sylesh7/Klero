@@ -20,6 +20,8 @@ export type JobRow = {
   output_hash: string | null;
   refund_tx_id: string | null;
   error: string | null;
+  agentkit_human: string | null; // World AgentBook anonymous human id (migration 002)
+  agentkit_address: string | null;
   created_at: Date;
   updated_at: Date;
 };

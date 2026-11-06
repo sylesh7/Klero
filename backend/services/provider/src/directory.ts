@@ -1,49 +1,47 @@
-import { CAPABILITY, ExpirationTime, NETWORK, ServiceSchema, listServices, u64 } from '@forkos/shared';
-import { ENDPOINT, env } from './config';
-import { arkivProviderWallet, arkivPub } from './arkiv';
+import { CAPABILITY, clientFor, directoryFrom, publishHcs } from '@forkos/shared';
+import { ENDPOINT, env, PROVIDER_ACCOUNT_MAP } from './config';
+import { follower } from './hcs';
 
-export let serviceKey: string | null = null;
+const client = clientFor(env.PROVIDER_ACCOUNT_ID, env.PROVIDER_ACCOUNT_KEY);
 
-/** Create or refresh our Service entity (owner = provider wallet). Lifetime 24 h, refreshed every 6 h. */
-export async function publishService(): Promise<string> {
-  const owner = arkivProviderWallet.account.address.toLowerCase();
-  const values = {
-    providerId: env.PROVIDER_ID,
-    capability: CAPABILITY,
-    network: NETWORK,
-    asset: env.PAY_ASSET,
-    price: u64(BigInt(env.PROVIDER_PRICE)),
-    name: env.PROVIDER_NAME,
-    endpoint: ENDPOINT,
-    payTo: env.PROVIDER_ACCOUNT_ID,
-  };
-  const existing = (await listServices(arkivPub)).find((s) => s.providerId === env.PROVIDER_ID && s.owner === owner);
-  if (existing) {
-    const key = existing.key as `0x${string}`;
-    await arkivProviderWallet.patchEntity(ServiceSchema, key, { set: values });
-    await arkivProviderWallet.extendEntity({
-      entityKey: key,
-      expiration: ExpirationTime.atDate(new Date(Date.now() + 24 * 3600_000)),
-    });
-    serviceKey = existing.key;
-    return existing.key;
+/** HCS sequence number of our live SERVICE announcement (null until published / seen). */
+export let serviceSeq: number | null = null;
+
+/**
+ * Announce this provider in the HCS service directory. Submitted by our own account, so readers can trust it
+ * (directoryFrom accepts only the registered provider account as payer and payTo). Skipped when the latest
+ * announcement on the topic already says exactly this — restarts don't spam the topic.
+ */
+export async function publishService(): Promise<number> {
+  await follower.sync();
+  const mine = directoryFrom(follower.messages, PROVIDER_ACCOUNT_MAP).find((s) => s.providerId === env.PROVIDER_ID);
+  if (
+    mine &&
+    mine.price === BigInt(env.PROVIDER_PRICE) &&
+    mine.endpoint === ENDPOINT &&
+    mine.name === env.PROVIDER_NAME &&
+    mine.asset === env.PAY_ASSET
+  ) {
+    serviceSeq = mine.seq;
+    return mine.seq;
   }
-  const created = await arkivProviderWallet.createEntity(ServiceSchema, values, {
-    expiration: ExpirationTime.fromHours(24),
+  const { seq } = await publishHcs(client, env.HCS_TOPIC_ID, {
+    v: 1,
+    t: 'SERVICE',
+    svc: env.PROVIDER_ID,
+    cap: CAPABILITY,
+    name: env.PROVIDER_NAME,
+    price: env.PROVIDER_PRICE,
+    asset: env.PAY_ASSET,
+    payTo: env.PROVIDER_ACCOUNT_ID,
+    url: ENDPOINT,
   });
-  serviceKey = created.entityKey;
-  return created.entityKey;
+  serviceSeq = seq;
+  return seq;
 }
 
 export function startDirectoryRefresh(log: { info: (o: object, m: string) => void; error: (o: object, m: string) => void }) {
-  const run = async () => {
-    try {
-      const key = await publishService();
-      log.info({ key }, 'arkiv service published');
-    } catch (err) {
-      log.error({ err }, 'arkiv service publish failed');
-    }
-  };
-  void run();
-  setInterval(run, 6 * 3600_000);
+  void publishService()
+    .then((seq) => log.info({ seq }, 'service announced on HCS'))
+    .catch((err) => log.error({ err }, 'HCS service announcement failed'));
 }
