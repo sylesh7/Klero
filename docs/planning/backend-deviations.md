@@ -251,3 +251,21 @@ Two fixes, both in place:
 
 Note the script takes the label as its first argument, so `pnpm agent:link --help` starts a real device flow
 with the label `--help` rather than printing usage.
+
+## P24 — device authorization sends `acr_values` (optional, `WORLD_ACR_VALUES`)
+
+The doc's device start sends only `client_id`, `client_secret`, `scope=openid` (+ the pinned `sub` claim for
+step-ups). On production `auth.world.org` that made the approval page offer **only** "Continue with a passkey",
+so an Orb-verified user without a World IdP passkey could never finish: every attempt stayed
+`authorization_pending` and expired.
+
+World's step-up guide says passkeys are offered first *unless the first requested class is `orb-face` or
+`selfie-face`*, and that the device endpoint accepts `acr_values`. So `startDeviceFlow` now adds
+`acr_values=<WORLD_ACR_VALUES>` when that variable is set (`services/api/src/config.ts`, `world.ts`).
+
+- Default is empty → requests are byte-for-byte what they were before.
+- Set to `https://world.org/oidc/acr/orb-face` for the live demo. Approved tokens then carry
+  `acr=…/orb-face` and `amr` including `face`. Linking (×3) and an over-cap approval completed with it live;
+  revoke uses the same `startDeviceFlow` but was not exercised live.
+- Requiring `orb-face` means only Orb-verified World IDs can approve. That is stricter than "Any account"; leave
+  the variable empty if a non-Orb identity must be able to approve.
