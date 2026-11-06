@@ -26,13 +26,35 @@ the attempt started. Device codes are stored AES-256-GCM encrypted and never lea
 
 | # | Path | Expected | Status |
 |---|---|---|---|
-| D1 | Cancelled in the World app | attempt `DENIED (access_denied)`, nothing changes | <!-- fill after running --> |
+| D1 | Cancelled / account not accepted | attempt `DENIED (access_denied)`, nothing changes | **OBSERVED** — see below |
 | D2 | Left to expire | attempt `EXPIRED`, nothing changes | <!-- fill --> |
-| D3 | Approved by a different identity | `DENIED` — `access_denied` from World (pinned `sub`) or `wrong_human` from our own re-check | <!-- fill --> |
+| D3 | Identity not accepted by the app's policy | `DENIED (access_denied)` | **OBSERVED** — see below |
 | D4 | Approval replayed onto a different payment | digest mismatch -> a new approval is required; the first is never consumed | **verified by test** (`services/api/test/approvals.test.ts`) |
 | D5 | Approval used twice | `409 APPROVAL_MISMATCH (already used)` | **verified** (consumed under `for update` in one transaction) |
 
-D4 and D5 are covered by automated tests. D1–D3 need a phone and are run from the runbook.
+D4 and D5 are covered by automated tests. D2 needs a 20-minute wait; D1 and D3 were observed live.
+
+### Observed denied path (live, 2026-11-06)
+
+Two `LINK` attempts were approved on a phone whose World account did not meet the application's accepted-accounts
+policy. World returned `access_denied` at the token endpoint. Our worker recorded:
+
+```
+user_code     status   reason
+6X443-Q23Y2   DENIED   access_denied
+L7J74-WWY2Y   DENIED   access_denied
+```
+
+The protected action did **not** occur, and nothing partial was left behind:
+
+```
+humans 0 | agents 0 | agent_tokens 0 | owner_sessions 0
+operator balance unchanged (510.86 HBAR) -- no Hedera account was created or funded
+```
+
+This is the important property: agent linking creates a Hedera account, funds an Arkiv wallet and publishes to
+HCS, and **none of it happens** unless World returns a validated approval first. The side effects are strictly
+downstream of the `APPROVED` branch in `startWorldWorker`.
 
 ## Friction we hit
 
