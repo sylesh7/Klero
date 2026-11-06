@@ -10,6 +10,7 @@ import {
   type JobView,
   type ServiceRow,
 } from '@forkos/shared';
+import { agentkitClient, agentkitHeaderFor } from './agentkit';
 import { ForkosApi } from './api';
 import { agentIdentity } from './identity';
 
@@ -35,10 +36,12 @@ export class ForkosAgent {
   private follower!: TopicFollower;
   private hedera!: ReturnType<typeof clientFor>;
   private log: NonNullable<AgentOptions['log']>;
+  private readonly agentkit;
 
   constructor(private readonly opts: AgentOptions) {
     this.id = agentIdentity(opts.key);
     this.api = new ForkosApi(opts.apiUrl, opts.token);
+    this.agentkit = agentkitClient(opts.key);
     this.log = opts.log ?? ((m, e) => console.log(`[${this.id.address.slice(0, 8)}] ${m}`, e ?? ''));
   }
 
@@ -121,15 +124,20 @@ export class ForkosAgent {
         if (j.round > c.round) continue; // winner's payment was proven VOID → next round
         return { kind: 'PAID_BY_OTHER', jobKey: job.jobKey, round: j.round, result: j.intent?.result, winner: c.view.winner?.agent ?? '' };
       }
-      const out = await this.payLoop(job, c.round);
+      const out = await this.payLoop(job, c.round, svc);
       if (out) return out;
     }
     return { kind: 'FAILED', jobKey: job.jobKey, reason: 'too many rounds' };
   }
 
-  private async payLoop(job: { jobKey: string; audioUrl: string; inputHash: string }, round: number): Promise<BuyOutcome | null> {
+  private async payLoop(job: { jobKey: string; audioUrl: string; inputHash: string }, round: number, svc: ServiceRow): Promise<BuyOutcome | null> {
     for (;;) {
-      const r = await this.api.pay({ jobKey: job.jobKey, round, audioUrl: job.audioUrl, inputHash: job.inputHash });
+      // World AgentKit: a fresh signed proof per call (challenges are single-use and live 5 min; approvals can take longer)
+      const agentkit = await agentkitHeaderFor(this.agentkit, svc, job, round, this.id.address).catch((err) => {
+        this.log('agentkit proof skipped', String(err));
+        return undefined;
+      });
+      const r = await this.api.pay({ jobKey: job.jobKey, round, audioUrl: job.audioUrl, inputHash: job.inputHash, agentkit });
       const status = r.body?.status;
       if (r.http === 200) {
         return { kind: 'PAID_BY_ME', jobKey: job.jobKey, round, result: r.body.result, intent: r.body.intent };
