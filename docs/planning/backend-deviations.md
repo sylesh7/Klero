@@ -269,3 +269,23 @@ World's step-up guide says passkeys are offered first *unless the first requeste
   revoke uses the same `startDeviceFlow` but was not exercised live.
 - Requiring `orb-face` means only Orb-verified World IDs can approve. That is stricter than "Any account"; leave
   the variable empty if a non-Orb identity must be able to approve.
+
+## P9 — referee: a REFUND that reaches consensus before SETTLED is held, not dropped (found live)
+
+The referee accepted `REFUND` only after it had seen `SETTLED` for the same tx. Live on testnet the provider
+refunded a chaos-failed job so fast that its `REFUND` (HCS seq 26) reached consensus **before** the operator's
+`SETTLED` (seq 27). The refund was silently dropped: the job view said `PAID` forever, losing agents waited for
+`DONE|REFUNDED` until they timed out, and `forkos audit` would not have checked the refund.
+
+Now a trusted `REFUND` naming the current round's intent tx is held and applied when the matching `SETTLED`
+arrives (reset when a round closes). A refund still never counts for a payment that did not settle. Tests:
+early refund applied after SETTLED; early refund for a different tx ignored; early refund from an unknown
+account ignored. After the fix the audit reports `A5 refund real` for both refunded jobs.
+
+## P5 — Mirror client: per-request timeout + retries (found live)
+
+`Mirror.get` was a bare `fetch` with no deadline. When a connection to the Mirror Node stalled, the call hung for
+undici's 300 s `headersTimeout` and the winning agent crashed (`UND_ERR_HEADERS_TIMEOUT`) — twice in live runs,
+both after the payment had already completed. Each request now has a 15 s deadline and up to 3 attempts with
+backoff for network errors, timeouts and 5xx. **404 and other 4xx are never retried**: a 404 is an answer, and
+the VOID proof rests on it. Options are `new Mirror(url, { timeoutMs, attempts, retryDelayMs })`.
