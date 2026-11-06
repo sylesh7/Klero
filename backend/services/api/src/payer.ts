@@ -180,6 +180,7 @@ export async function sendIntent(row: IntentRow): Promise<IntentRow> {
     [H_AGENT]: row.agent_addr,
     [H_CLAIM]: view.winner?.arkivKey ?? '',
     ...httpClient.encodePaymentSignatureHeader(row.payment_payload as unknown as PaymentPayload),
+    ...(chaos.takeFail() ? { 'x-forkos-chaos-fail': '1' } : {}),
   };
   await sql`update intents set status = 'SENT', attempts = attempts + 1, updated_at = now() where id = ${row.id}`;
 

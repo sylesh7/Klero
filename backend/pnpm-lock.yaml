@@ -74,6 +74,9 @@ importers:
       openai:
         specifier: ^7.52.0
         version: 7.52.0(ws@8.21.0)(zod@3.25.76)
+      viem:
+        specifier: ^2.40.0
+        version: 2.57.16(typescript@5.9.3)(zod@3.25.76)
       zod:
         specifier: ^3.25.0
         version: 3.25.76
@@ -83,6 +86,9 @@ importers:
       '@forkos/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@forkos/x402-hedera':
+        specifier: workspace:*
+        version: link:../../packages/x402-hedera
       commander:
         specifier: ^12.1.0
         version: 12.1.0
@@ -2193,7 +2199,7 @@ snapshots:
 
   '@scure/bip32@1.7.0':
     dependencies:
-      '@noble/curves': 1.9.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
