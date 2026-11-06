@@ -1,6 +1,6 @@
 export default function Faq() {
   return (
-    <section className="faq-section">
+    <section id="faq" className="faq-section">
       <div className="section-wrap">
         <div className="container-2nd">
           <div className="faq-grid">
@@ -14,7 +14,7 @@ export default function Faq() {
                 </p>
               </div>
               <div fade-anim="True" className="faq-contact-button-box">
-                <a data-wf--primary-button--variant="full-width" href="/app" className="primary-button w-variant-a463856d-9e90-63e6-cf33-267087a243a0 w-inline-block">
+                <a data-wf--primary-button--variant="full-width" href="/login" className="primary-button w-variant-a463856d-9e90-63e6-cf33-267087a243a0 w-inline-block">
                   <div className="primary-button-text-items">
                     <div className="primary-button-text-wrap">
                       <div className="primary-button-text one">

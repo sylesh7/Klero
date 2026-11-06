@@ -17,7 +17,7 @@ export default function Hero() {
               The exactly-once layer for AI agent payments. When your agents fork, one claim wins, one payment settles on Hedera, and nobody can make you pay twice.
             </p>
             <div className="hero-banner-button-box">
-              <a data-wf--primary-button--variant="3rd-button" href="/app" className="primary-button w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e w-inline-block">
+              <a data-wf--primary-button--variant="3rd-button" href="/login" className="primary-button w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e w-inline-block">
                 <div className="primary-button-text-items w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e">
                   <div className="primary-button-text-wrap w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e">
                     <div className="primary-button-text one">
@@ -172,18 +172,21 @@ export default function Hero() {
               </div>
             </div>
             <div className="hero-banner-img-flex">
-              <div className="hero-banner-img-wrap">
+              <div className="hero-banner-img-wrap" aria-label="Klero">
                 <div className="hero-banner-img-items">
-                  <img src="/assets/6a9424211b2b0d914d64771e_hero_banner_01.jpg" loading="lazy" alt="Banner" className="hero-banner-img" />
+                  <div className="hero-banner-img" style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#d3fb43', color: '#000', border: '1px solid #000', fontSize: 12, fontWeight: 700 }}>K</div>
                 </div>
                 <div className="hero-banner-img-items">
-                  <img src="/assets/6a942421b4bf4d1e2e7a7724_hero_banner_02.jpg" loading="lazy" alt="Banner" className="hero-banner-img" />
+                  <div className="hero-banner-img" style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#d3fb43', border: '1px solid #000', fontSize: 12, fontWeight: 700 }}>L</div>
                 </div>
                 <div className="hero-banner-img-items">
-                  <img src="/assets/6a942421a5258781db5fd108_hero_banner_03.jpg" loading="lazy" alt="Banner" className="hero-banner-img" />
+                  <div className="hero-banner-img" style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#d3fb43', color: '#000', border: '1px solid #000', fontSize: 12, fontWeight: 700 }}>E</div>
                 </div>
                 <div className="hero-banner-img-items">
-                  <img src="/assets/6a942421357229175e6e7577_hero_banner_04.jpg" loading="lazy" alt="Banner" className="hero-banner-img" />
+                  <div className="hero-banner-img" style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#d3fb43', border: '1px solid #000', fontSize: 12, fontWeight: 700 }}>R</div>
+                </div>
+                <div className="hero-banner-img-items">
+                  <div className="hero-banner-img" style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#d3fb43', color: '#000', border: '1px solid #000', fontSize: 12, fontWeight: 700 }}>O</div>
                 </div>
               </div>
               <div className="hero-banner-img-text-flex">
@@ -208,24 +211,24 @@ export default function Hero() {
         <div className="hero-banner-marquee-wrap">
           <div className="hero-banner-marquee-flex">
             <div className="hero-banner-marquee-items">
-              <img src="/assets/6a94292360c2b363a28da73c_marquee_banner.png" loading="lazy" sizes="(max-width: 2720px) 100vw, 2720px" srcSet="/assets/6a94292360c2b363a28da73c_marquee_banner_p_500.png 500w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_800.png 800w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_1080.png 1080w, /assets/6a94292360c2b363a28da73c_marquee_banner.png 2720w" alt="Hero Bnner Marquee Img" className="hero-banner-marquee-img" />
+              <div className="hero-banner-marquee-img" aria-hidden="true" style={{ height: 360, display: 'flex', alignItems: 'flex-end', paddingBottom: 28, boxSizing: 'border-box', justifyContent: 'space-around', background: '#000', color: '#d3fb43', fontSize: 'clamp(28px, 4.2vw, 64px)', fontWeight: 600, letterSpacing: '-0.03em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}><span>Claim</span><span style={{ color: '#f1efe2' }}>·</span><span>Intent</span><span style={{ color: '#f1efe2' }}>·</span><span>Settled</span><span style={{ color: '#f1efe2' }}>·</span></div>
             </div>
             <div className="hero-banner-marquee-items">
-              <img src="/assets/6a94292360c2b363a28da73c_marquee_banner.png" loading="lazy" sizes="(max-width: 2720px) 100vw, 2720px" srcSet="/assets/6a94292360c2b363a28da73c_marquee_banner_p_500.png 500w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_800.png 800w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_1080.png 1080w, /assets/6a94292360c2b363a28da73c_marquee_banner.png 2720w" alt="Hero Bnner Marquee Img" className="hero-banner-marquee-img" />
+              <div className="hero-banner-marquee-img" aria-hidden="true" style={{ height: 360, display: 'flex', alignItems: 'flex-end', paddingBottom: 28, boxSizing: 'border-box', justifyContent: 'space-around', background: '#000', color: '#d3fb43', fontSize: 'clamp(28px, 4.2vw, 64px)', fontWeight: 600, letterSpacing: '-0.03em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}><span>Claim</span><span style={{ color: '#f1efe2' }}>·</span><span>Intent</span><span style={{ color: '#f1efe2' }}>·</span><span>Settled</span><span style={{ color: '#f1efe2' }}>·</span></div>
             </div>
             <div className="hero-banner-marquee-items">
-              <img src="/assets/6a94292360c2b363a28da73c_marquee_banner.png" loading="lazy" sizes="(max-width: 2720px) 100vw, 2720px" srcSet="/assets/6a94292360c2b363a28da73c_marquee_banner_p_500.png 500w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_800.png 800w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_1080.png 1080w, /assets/6a94292360c2b363a28da73c_marquee_banner.png 2720w" alt="Hero Bnner Marquee Img" className="hero-banner-marquee-img" />
+              <div className="hero-banner-marquee-img" aria-hidden="true" style={{ height: 360, display: 'flex', alignItems: 'flex-end', paddingBottom: 28, boxSizing: 'border-box', justifyContent: 'space-around', background: '#000', color: '#d3fb43', fontSize: 'clamp(28px, 4.2vw, 64px)', fontWeight: 600, letterSpacing: '-0.03em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}><span>Claim</span><span style={{ color: '#f1efe2' }}>·</span><span>Intent</span><span style={{ color: '#f1efe2' }}>·</span><span>Settled</span><span style={{ color: '#f1efe2' }}>·</span></div>
             </div>
           </div>
           <div className="hero-banner-marquee-flex">
             <div className="hero-banner-marquee-items">
-              <img src="/assets/6a94292360c2b363a28da73c_marquee_banner.png" loading="lazy" sizes="(max-width: 2720px) 100vw, 2720px" srcSet="/assets/6a94292360c2b363a28da73c_marquee_banner_p_500.png 500w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_800.png 800w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_1080.png 1080w, /assets/6a94292360c2b363a28da73c_marquee_banner.png 2720w" alt="Hero Bnner Marquee Img" className="hero-banner-marquee-img" />
+              <div className="hero-banner-marquee-img" aria-hidden="true" style={{ height: 360, display: 'flex', alignItems: 'flex-end', paddingBottom: 28, boxSizing: 'border-box', justifyContent: 'space-around', background: '#000', color: '#d3fb43', fontSize: 'clamp(28px, 4.2vw, 64px)', fontWeight: 600, letterSpacing: '-0.03em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}><span>Claim</span><span style={{ color: '#f1efe2' }}>·</span><span>Intent</span><span style={{ color: '#f1efe2' }}>·</span><span>Settled</span><span style={{ color: '#f1efe2' }}>·</span></div>
             </div>
             <div className="hero-banner-marquee-items">
-              <img src="/assets/6a94292360c2b363a28da73c_marquee_banner.png" loading="lazy" sizes="(max-width: 2720px) 100vw, 2720px" srcSet="/assets/6a94292360c2b363a28da73c_marquee_banner_p_500.png 500w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_800.png 800w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_1080.png 1080w, /assets/6a94292360c2b363a28da73c_marquee_banner.png 2720w" alt="Hero Bnner Marquee Img" className="hero-banner-marquee-img" />
+              <div className="hero-banner-marquee-img" aria-hidden="true" style={{ height: 360, display: 'flex', alignItems: 'flex-end', paddingBottom: 28, boxSizing: 'border-box', justifyContent: 'space-around', background: '#000', color: '#d3fb43', fontSize: 'clamp(28px, 4.2vw, 64px)', fontWeight: 600, letterSpacing: '-0.03em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}><span>Claim</span><span style={{ color: '#f1efe2' }}>·</span><span>Intent</span><span style={{ color: '#f1efe2' }}>·</span><span>Settled</span><span style={{ color: '#f1efe2' }}>·</span></div>
             </div>
             <div className="hero-banner-marquee-items">
-              <img src="/assets/6a94292360c2b363a28da73c_marquee_banner.png" loading="lazy" sizes="(max-width: 2720px) 100vw, 2720px" srcSet="/assets/6a94292360c2b363a28da73c_marquee_banner_p_500.png 500w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_800.png 800w, /assets/6a94292360c2b363a28da73c_marquee_banner_p_1080.png 1080w, /assets/6a94292360c2b363a28da73c_marquee_banner.png 2720w" alt="Hero Bnner Marquee Img" className="hero-banner-marquee-img" />
+              <div className="hero-banner-marquee-img" aria-hidden="true" style={{ height: 360, display: 'flex', alignItems: 'flex-end', paddingBottom: 28, boxSizing: 'border-box', justifyContent: 'space-around', background: '#000', color: '#d3fb43', fontSize: 'clamp(28px, 4.2vw, 64px)', fontWeight: 600, letterSpacing: '-0.03em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}><span>Claim</span><span style={{ color: '#f1efe2' }}>·</span><span>Intent</span><span style={{ color: '#f1efe2' }}>·</span><span>Settled</span><span style={{ color: '#f1efe2' }}>·</span></div>
             </div>
           </div>
           <div className="hero-banner-marquee-icon-wrap">

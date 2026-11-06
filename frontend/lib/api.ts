@@ -1,118 +1,77 @@
-import type { ZodTypeAny, z } from 'zod';
-import {
-  zAdminActionRes, zAllowanceRes, zAttackResult, zConfigRes, zDripRes, zFaucetRes, zFxRes, zInvoiceCreatedRes,
-  zInvoiceListRes, zInvoiceRequestListRes, zInvoiceRequestRes, zInvoiceView, zIntentView, zKeyChangeRes, zKeyEventsRes,
-  zMerchantView, zMerchantsRes, zPaymentsRes, zPrepareRes, zProtocolStatsRes, zQrResolveRes, zQuoteRes, zRegisterRes,
-  zRoutesRes, zScenariosRes, zStatsRes, zSubmitRes, zTxRes, zVerifyRes,
-  type zCreateInvoiceReq, type zInvoiceRequestReq, type zPayoutReq, type zPrepareReq, type zQuoteReq, type zRegisterReq,
-  type zRotateReq, type zSubmitReq, type ScenarioId,
-} from './shared';
+import type { ZodType, z } from 'zod';
 import { ENV } from './env';
+import { session } from './session';
+import * as T from './types';
 
 export class ApiError extends Error {
-  constructor(
-    public code: string,
-    message: string,
-    public status: number,
-    public details?: unknown,
-    public requestId?: string,
-  ) {
+  constructor(public code: string, message: string, public status: number, public details?: unknown) {
     super(message);
   }
 }
 
-async function call<S extends ZodTypeAny>(
-  method: 'GET' | 'POST',
-  path: string,
-  schema: S | null,
-  body?: unknown,
-  headers: Record<string, string> = {},
-): Promise<z.infer<S>> {
+type Auth = 'none' | 'owner' | 'demo';
+
+async function call<S extends ZodType>(method: 'GET' | 'POST' | 'PUT', path: string, schema: S, opts: { body?: unknown; auth?: Auth } = {}): Promise<z.infer<S>> {
+  const headers: Record<string, string> = {};
+  if (opts.body !== undefined) headers['content-type'] = 'application/json';
+  if (opts.auth === 'owner') {
+    const t = session.token();
+    if (!t) throw new ApiError('UNAUTHORIZED', 'Sign in with World ID first.', 401);
+    headers.authorization = `Bearer ${t}`;
+  }
+  if (opts.auth === 'demo') headers['x-demo-key'] = ENV.DEMO_KEY;
+
   let r: Response;
   try {
-    r = await fetch(`${ENV.API_URL}${path}`, {
-      method,
-      headers: { ...(body !== undefined ? { 'content-type': 'application/json' } : {}), ...headers },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    r = await fetch(`${ENV.API_URL}${path}`, { method, headers, body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined, cache: 'no-store' });
   } catch {
-    throw new ApiError('NETWORK', 'No connection. Check your internet and try again.', 0);
+    throw new ApiError('NETWORK', 'Cannot reach the Klero API.', 0);
   }
   const text = await r.text();
   let json: any = {};
-  try {
-    json = text ? JSON.parse(text) : {};
-  } catch {
-    throw new ApiError('INTERNAL', 'Unexpected response from Klero. Try again.', r.status);
-  }
+  try { json = text ? JSON.parse(text) : {}; } catch { throw new ApiError('INTERNAL', 'Unexpected response from the API.', r.status); }
   if (!r.ok) {
     const e = json.error ?? {};
-    throw new ApiError(e.code ?? 'INTERNAL', e.message ?? 'Something went wrong.', r.status, e.details, e.requestId);
+    if (r.status === 401 && opts.auth === 'owner') session.clear(); // expired/invalid fos_ token → back to /login
+    throw new ApiError(e.code ?? 'INTERNAL', e.message ?? `HTTP ${r.status}`, r.status, json);
   }
-  return schema ? schema.parse(json) : json;
+  const parsed = schema.safeParse(json);
+  if (!parsed.success) {
+    console.error('[api] schema mismatch', path, parsed.error.issues);
+    throw new ApiError('SCHEMA', `API response for ${path} did not match the contract.`, r.status, parsed.error.issues);
+  }
+  return parsed.data;
 }
 
-const q = (o: Record<string, string | number | undefined>) =>
-  '?' + Object.entries(o).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&');
+const q = encodeURIComponent;
 
 export const api = {
-  // config + fx
-  config: () => call('GET', '/v1/config', zConfigRes),
-  fx: (quote: string) => call('GET', `/v1/fx${q({ quote })}`, zFxRes),
-  stats: (chainId: number) => call('GET', `/v1/stats/${chainId}`, zProtocolStatsRes),
+  health: () => call('GET', '/v1/health', T.zAny),
+  config: () => call('GET', '/v1/config', T.zConfig),
 
-  // merchants
-  registerMerchant: (b: z.input<typeof zRegisterReq>) => call('POST', '/v1/merchants/register', zRegisterRes, b),
-  rotateSigner: (b: z.input<typeof zRotateReq>) => call('POST', '/v1/merchants/rotate-signer', zKeyChangeRes, b),
-  updatePayout: (b: z.input<typeof zPayoutReq>) => call('POST', '/v1/merchants/update-payout', zKeyChangeRes, b),
-  merchant: (chainId: number, id: string) => call('GET', `/v1/merchants/${chainId}/${id}`, zMerchantView),
-  merchantsByOwner: (chainId: number, owner: string) => call('GET', `/v1/merchants/by-owner/${chainId}/${owner}`, zMerchantsRes),
-  merchantPayments: (chainId: number, id: string, limit = 25, offset = 0) =>
-    call('GET', `/v1/merchants/${chainId}/${id}/payments${q({ limit, offset })}`, zPaymentsRes),
-  merchantStats: (chainId: number, id: string, days = 14) => call('GET', `/v1/merchants/${chainId}/${id}/stats${q({ days })}`, zStatsRes),
-  merchantKeys: (chainId: number, id: string) => call('GET', `/v1/merchants/${chainId}/${id}/keys`, zKeyEventsRes),
-  merchantInvoices: (chainId: number, id: string) => call('GET', `/v1/merchants/${chainId}/${id}/invoices`, zInvoiceListRes),
-  merchantRequests: (chainId: number, id: string) => call('GET', `/v1/merchants/${chainId}/${id}/invoice-requests`, zInvoiceRequestListRes),
+  loginStart: () => call('POST', '/v1/owner/login/start', T.zLoginStart, { body: {} }),
+  loginPoll: (attemptId: string) => call('GET', `/v1/owner/login/${q(attemptId)}`, T.zLoginPoll),
 
-  // invoices + QR
-  createInvoice: (b: z.input<typeof zCreateInvoiceReq>) => call('POST', '/v1/invoices', zInvoiceCreatedRes, b),
-  invoice: (code: string) => call('GET', `/v1/invoices/${code}`, zInvoiceView),
-  createInvoiceRequest: (b: z.input<typeof zInvoiceRequestReq>) => call('POST', '/v1/invoice-requests', zInvoiceRequestRes, b),
-  invoiceRequest: (id: string) => call('GET', `/v1/invoice-requests/${id}`, zInvoiceRequestRes),
-  qrResolve: (data: string) => call('GET', `/v1/qr/resolve${q({ data })}`, zQrResolveRes),
+  me: () => call('GET', '/v1/me', T.zMe, { auth: 'owner' }),
+  pairing: (label: string) => call('POST', '/v1/pairings', T.zPairing, { auth: 'owner', body: { label } }),
+  revokeStart: (agentAddr: string) => call('POST', `/v1/agents/${q(agentAddr)}/revoke/start`, T.zApprovalStart, { auth: 'owner', body: {} }),
+  approval: (id: string) => call('GET', `/v1/approvals/${q(id)}`, T.zApproval, { auth: 'owner' }),
+  approvalCancel: (id: string) => call('POST', `/v1/approvals/${q(id)}/cancel`, T.zAny, { auth: 'owner', body: {} }),
 
-  // paying
-  routes: (shortCode: string) => call('GET', `/v1/routes${q({ shortCode })}`, zRoutesRes),
-  quote: (b: z.input<typeof zQuoteReq>) => call('POST', '/v1/quotes', zQuoteRes, b),
-  prepare: (b: z.input<typeof zPrepareReq>) => call('POST', '/v1/intents/prepare', zPrepareRes, b),
-  submit: (b: z.input<typeof zSubmitReq>) => call('POST', '/v1/intents/submit', zSubmitRes, b, { 'idempotency-key': b.draftId }),
-  intent: (chainId: number, id: string) => call('GET', `/v1/intents/${chainId}/${id}`, zIntentView),
-  sourceTx: (chainId: number, id: string, txHash: string) => call('POST', `/v1/intents/${chainId}/${id}/source-tx`, null, { txHash }),
-  simulateDeposit: (chainId: number, id: string, amount?: string) =>
-    call('POST', `/v1/intents/${chainId}/${id}/simulate-deposit`, zTxRes, amount ? { amount } : {}),
-  verify: (chainId: number, id: string) => call('GET', `/v1/verify/${chainId}/${id}`, zVerifyRes),
+  policy: () => call('GET', '/v1/policy', T.zPolicy, { auth: 'owner' }),
+  putPolicy: (p: Partial<Pick<T.Policy, 'capPerPayment' | 'dailyCap' | 'allowlist'>>) => call('PUT', '/v1/policy', T.zPolicy, { auth: 'owner', body: p }),
 
-  // account helpers
-  allowance: (chainId: number, token: string, owner: string) => call('GET', `/v1/allowance${q({ chainId, token, owner })}`, zAllowanceRes),
-  drip: (chainId: number, address: string, tokenKey: string) => call('POST', '/v1/gas/drip', zDripRes, { chainId, address, tokenKey }),
-  faucet: (chainId: number, address: string) => call('POST', '/v1/faucet', zFaucetRes, { chainId, address }),
+  job: (jobKey: string) => call('GET', `/v1/jobs/${q(jobKey)}`, T.zJob, { auth: 'owner' }),
+  intent: (id: string) => call('GET', `/v1/intents/${q(id)}`, T.zIntent, { auth: 'owner' }),
+  counter: (jobKey: string, since: number) => call('GET', `/v1/counter?jobKey=${q(jobKey)}&since=${since}`, T.zCounter),
 
-  // attack lab
-  attackScenarios: () => call('GET', '/v1/attack/scenarios', zScenariosRes),
-  attackRun: (chainId: number, scenario: ScenarioId, broadcast = false) =>
-    call('POST', '/v1/attack/run', zAttackResult, { chainId, scenario, broadcast }),
+  directory: () => call('GET', '/v1/directory', T.zDirectory),
+  board: (jobKey: string) => call('GET', `/v1/board?jobKey=${q(jobKey)}`, T.zBoard),
+  timeline: (jobKey: string) => call('GET', `/v1/timeline?jobKey=${q(jobKey)}`, T.zTimeline),
 
-  // admin (token from the Admin page input, kept in sessionStorage)
-  adminMerchants: (token: string, chainId: number, status?: string) =>
-    call('GET', `/v1/admin/merchants${q({ chainId, status })}`, zMerchantsRes, undefined, { authorization: `Bearer ${token}` }),
-  adminAction: (token: string, chainId: number, merchantId: string, action: 'approve' | 'reactivate' | 'suspend' | 'revoke') =>
-    call('POST', `/v1/admin/merchants/${chainId}/${merchantId}/${action}`, zAdminActionRes, {}, { authorization: `Bearer ${token}` }),
-};
-
-/** Live-update stream paths served by the API (SSE). */
-export const streams = {
-  intent: (chainId: number, intentId: string) => `/v1/stream/intent/${chainId}/${intentId}`,
-  merchant: (chainId: number, merchantId: string) => `/v1/stream/merchant/${chainId}/${merchantId}`,
-  invoice: (shortCode: string) => `/v1/stream/invoice/${shortCode}`,
-  invoiceRequest: (requestId: string) => `/v1/stream/invoice-request/${requestId}`,
+  demoJob: () => call('POST', '/v1/demo/job', T.zDemoJob, { auth: 'demo', body: {} }),
+  chaosKill: () => call('POST', '/v1/chaos/kill-next-payer', T.zArmed, { auth: 'demo', body: {} }),
+  chaosFail: () => call('POST', '/v1/chaos/fail-next-job', T.zArmed, { auth: 'demo', body: {} }),
+  chaosReplay: (intentId: string) => call('POST', `/v1/chaos/replay/${q(intentId)}`, T.zAny, { auth: 'demo', body: {} }),
+  chaosRevive: (agentAddr: string, jobKey: string) => call('POST', `/v1/chaos/revive/${q(agentAddr)}`, T.zAny, { auth: 'demo', body: { jobKey } }),
 };

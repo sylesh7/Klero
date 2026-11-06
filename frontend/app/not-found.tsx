@@ -9,7 +9,7 @@ export default function NotFound() {
           <div className="big" style={{ fontWeight: 700, fontSize: 28 }}>404</div>
           <h1 className="h2">Page not found</h1>
           <p className="muted">That page doesn&apos;t exist.</p>
-          <Link href="/app" className="btn">Home</Link>
+          <Link href="/" className="btn">Home</Link>
         </div>
       </div>
     </div>

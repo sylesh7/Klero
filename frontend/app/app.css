@@ -273,3 +273,59 @@ html, body { margin: 0; padding: 0; background: var(--pale); }
   body.sp-body, .sp-shell { background: #fff !important; }
   .print-page { padding: 2cm; text-align: center; }
 }
+
+/* ---------------- ForkOS additions (same tokens, same sharp boxes) ---------------- */
+.sp-shell.wide { max-width: 1240px; }
+.sp-shell.wide .sp-page { padding: 22px 24px 40px; }
+.sp-top .navlinks { display: flex; gap: 4px; margin-left: 12px; }
+.sp-top .navlinks a { padding: 8px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mute); border: 1px solid transparent; }
+.sp-top .navlinks a.active, .sp-top .navlinks a:hover { color: var(--ink); border-color: var(--ink); background: var(--neon); }
+@media (max-width: 760px) { .sp-top .navlinks { display: none; } }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+/* lanes */
+.lane { border: 1px solid var(--ink); background: var(--pale); display: flex; flex-direction: column; }
+.lane .lane-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--ink); }
+.lane.bad .lane-h { background: var(--bad-bg); }
+.lane.ok .lane-h { background: var(--neon); }
+.lane .big-n { font-family: var(--font-num); font-size: 96px; line-height: 0.9; letter-spacing: -0.04em; padding: 18px 14px 6px; }
+.lane .cap { padding: 0 14px 14px; color: var(--mute); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
+.lane .rows { border-top: 1px dashed var(--line); padding: 6px 14px 12px; }
+.lane .rows .r { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+
+/* agent cards on the race */
+.agents-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.agent { border: 1px solid var(--line); background: var(--pale-2); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.agent.won { border-color: var(--ink); background: var(--neon); }
+.agent.lost { opacity: 0.6; }
+.agent.revoked { background: var(--bad-bg); }
+
+/* death clock */
+.clock { border: 1px solid var(--ink); padding: 14px; display: flex; align-items: center; gap: 16px; background: var(--pale); }
+.clock .t { font-family: var(--font-num); font-size: 48px; line-height: 1; min-width: 120px; }
+.clock .bar { flex: 1; height: 10px; background: var(--pale-2); border: 1px solid var(--ink); position: relative; }
+.clock .bar i { position: absolute; inset: 0 auto 0 0; background: var(--ink); }
+.clock.void { background: var(--bad-bg); }
+.clock.paid { background: var(--ok-bg); }
+
+/* board + timeline tables */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mute); padding: 6px 8px; border-bottom: 1px solid var(--ink); }
+.tbl td { padding: 8px; border-bottom: 1px dashed var(--line); vertical-align: top; }
+.tbl tr.win td { background: var(--neon); }
+.tbl tr.void td { background: var(--bad-bg); }
+.tbl-wrap { overflow-x: auto; }
+.feed { max-height: 380px; overflow: auto; }
+.chip-t { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 6px; border: 1px solid var(--ink); text-transform: uppercase; letter-spacing: 0.06em; }
+.chip-t.CLAIM { background: var(--info-bg); } .chip-t.INTENT { background: var(--warn-bg); }
+.chip-t.PAID, .chip-t.DONE, .chip-t.SETTLED { background: var(--ok-bg); } .chip-t.VOID, .chip-t.REVOKE { background: var(--bad-bg); }
+.chip-t.LINK { background: var(--neon); }
+.flash { animation: flash 0.9s ease-out; }
+@keyframes flash { from { background: var(--neon); } to { background: transparent; } }
+.sp-shell.narrow .sp-page { max-width: 600px; margin: 0 auto; }
+.sp-top .title { white-space: nowrap; }
+.sp-top > * { flex-shrink: 0; }
+.sp-top .title { flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; }

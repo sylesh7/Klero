@@ -9,19 +9,19 @@ export default function Header() {
           </a>
           <div className="main-header-navbar">
             <div className="main-header-navigation">
-              <a href="/about-us" className="main-header-navigation-link">
+              <a href="#about" className="main-header-navigation-link">
                 ABOUT
               </a>
               <div className="main-header-navigation-dot" />
-              <a href="/solutions" className="main-header-navigation-link">
+              <a href="#safeguards" className="main-header-navigation-link">
                 SAFEGUARDS
               </a>
               <div className="main-header-navigation-dot" />
-              <a href="/case-study" className="main-header-navigation-link">
+              <a href="#how-it-works" className="main-header-navigation-link">
                 HOW IT WORKS
               </a>
               <div className="main-header-navigation-dot" />
-              <a href="/blogs" className="main-header-navigation-link last">
+              <a href="#faq" className="main-header-navigation-link last">
                 FAQ
               </a>
             </div>
@@ -32,7 +32,7 @@ export default function Header() {
             </div>
           </div>
           <div className="main-header-btn-box">
-            <a data-wf--primary-button--variant="main-button" href="/app" className="primary-button w-inline-block">
+            <a data-wf--primary-button--variant="main-button" href="/login" className="primary-button w-inline-block">
               <div className="primary-button-text-items">
                 <div className="primary-button-text-wrap">
                   <div className="primary-button-text one">

@@ -8,22 +8,11 @@ export default function Footer() {
               <div fade-anim="True" id="w-node-_39508f25-ced6-4205-1fb3-543507345883-0734587e" className="footer-page-items one">
                 <div className="footer-page-title-box">
                   <div className="footer-page-title">
-                    OUR SOCIAL:
+                    CODE:
                   </div>
                 </div>
                 <div className="footer-social-media-wrap">
-                  <a href="https://www.facebook.com/" target="_blank" className="footer-social-media-items w-inline-block">
-                    <img loading="lazy" src="/assets/6a93d8940646bb6234256c11_facebbok.svg" alt="Social Media" className="footer-social-media" />
-                  </a>
-                  <a href="https://www.instagram.com/" target="_blank" className="footer-social-media-items w-inline-block">
-                    <img loading="lazy" src="/assets/6a93d8948b8a10c09034542c_instagram.svg" alt="Social Media" className="footer-social-media" />
-                  </a>
-                  <a href="https://www.x.com/" target="_blank" className="footer-social-media-items w-inline-block">
-                    <img loading="lazy" src="/assets/6a93d894afb704e751a4a98c_x.svg" alt="Social Media" className="footer-social-media" />
-                  </a>
-                  <a href="https://www.linkedin.com/" target="_blank" className="footer-social-media-items w-inline-block">
-                    <img loading="lazy" src="/assets/6a93d894b942fbe871946fd5_linkedin.svg" alt="Social Media" className="footer-social-media" />
-                  </a>
+                  <a href="https://github.com/sylesh7/Klero-1" target="_blank" rel="noreferrer" className="footer-page-link w-inline-block"><div className="footer-page-link-box"><div className="footer-page-link-text one">GitHub</div><div className="footer-page-link-text two">GitHub</div></div></a>
                 </div>
               </div>
               <div fade-anim="True" className="footer-page-items">
@@ -43,7 +32,7 @@ export default function Footer() {
                       </div>
                     </div>
                   </a>
-                  <a href="/about" className="footer-page-link w-inline-block">
+                  <a href="#about" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
                         About
@@ -53,7 +42,7 @@ export default function Footer() {
                       </div>
                     </div>
                   </a>
-                  <a href="/safeguards" className="footer-page-link w-inline-block">
+                  <a href="#safeguards" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
                         Safeguards
@@ -63,13 +52,13 @@ export default function Footer() {
                       </div>
                     </div>
                   </a>
-                  <a href="/contact" className="footer-page-link w-inline-block">
+                  <a href="#how-it-works" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        Contact
+                        How it works
                       </div>
                       <div className="footer-page-link-text two">
-                        Contact
+                        How it works
                       </div>
                     </div>
                   </a>
@@ -78,47 +67,47 @@ export default function Footer() {
               <div fade-anim="True" className="footer-page-items">
                 <div className="footer-page-title-box">
                   <div className="footer-page-title">
-                    UTILITY
+                    APP
                   </div>
                 </div>
                 <div className="footer-page-wrap">
-                  <a href="/docs" className="footer-page-link w-inline-block">
+                  <a href="/dashboard" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        Docs
+                        Dashboard
                       </div>
                       <div className="footer-page-link-text two">
-                        Docs
+                        Dashboard
                       </div>
                     </div>
                   </a>
-                  <a href="/license" className="footer-page-link w-inline-block">
+                  <a href="/race" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        License
+                        Race demo
                       </div>
                       <div className="footer-page-link-text two">
-                        License
+                        Race demo
                       </div>
                     </div>
                   </a>
-                  <a href="/changelog" className="footer-page-link w-inline-block">
+                  <a href="/directory" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        Changelog
+                        Directory
                       </div>
                       <div className="footer-page-link-text two">
-                        Changelog
+                        Directory
                       </div>
                     </div>
                   </a>
-                  <a href="/deployments" className="footer-page-link w-inline-block">
+                  <a href="#faq" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        Deployments
+                        FAQ
                       </div>
                       <div className="footer-page-link-text two">
-                        Deployments
+                        FAQ
                       </div>
                     </div>
                   </a>
@@ -127,27 +116,27 @@ export default function Footer() {
               <div fade-anim="True" className="footer-page-items">
                 <div className="footer-page-title-box">
                   <div className="footer-page-title">
-                    Legal
+                    BUILT ON
                   </div>
                 </div>
                 <div className="footer-page-wrap">
-                  <a href="/trust-model" className="footer-page-link w-inline-block">
+                  <a href="https://hedera.com/" target="_blank" rel="noreferrer" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        Trust Model
+                        Hedera
                       </div>
                       <div className="footer-page-link-text two">
-                        Trust Model
+                        Hedera
                       </div>
                     </div>
                   </a>
-                  <a href="/license" className="footer-page-link w-inline-block">
+                  <a href="https://world.org/" target="_blank" rel="noreferrer" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        MIT License
+                        World
                       </div>
                       <div className="footer-page-link-text two">
-                        MIT License
+                        World
                       </div>
                     </div>
                   </a>
@@ -156,17 +145,17 @@ export default function Footer() {
               <div fade-anim="True" className="footer-page-items">
                 <div className="footer-page-title-box">
                   <div className="footer-page-title">
-                    CONTACT US:
+                    LINKS:
                   </div>
                 </div>
                 <div className="footer-page-wrap">
-                  <a href="mailto:hello@klero.example" className="footer-page-link w-inline-block">
+                  <a href="https://github.com/sylesh7/Klero-1" target="_blank" rel="noreferrer" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        hello@klero.example
+                        GitHub
                       </div>
                       <div className="footer-page-link-text two">
-                        hello@klero.example
+                        GitHub
                       </div>
                     </div>
                   </a>

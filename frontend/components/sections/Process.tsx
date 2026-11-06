@@ -1,6 +1,6 @@
 export default function Process() {
   return (
-    <section className="process-section">
+    <section id="how-it-works" className="process-section">
       <div className="section-wrap">
         <div className="container top-border">
           <div className="extra-height" />
@@ -32,7 +32,7 @@ export default function Process() {
               </div>
             </div>
             <div scale-up="True" className="process-button-box">
-              <a data-wf--primary-button--variant="3rd-button" href="/app" className="primary-button w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e w-inline-block">
+              <a data-wf--primary-button--variant="3rd-button" href="/login" className="primary-button w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e w-inline-block">
                 <div className="primary-button-text-items w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e">
                   <div className="primary-button-text-wrap w-variant-5c198abb-72b9-9083-ac28-2758d34ab69e">
                     <div className="primary-button-text one">

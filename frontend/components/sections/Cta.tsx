@@ -9,38 +9,42 @@ export default function Cta() {
             </div>
             <div fade-anim="True" className="cta-title-box">
               <h2 className="cta-title">
-                Stay in the loop as Klero goes live on Hedera
+                Stop paying twice for the same job.
               </h2>
             </div>
             <div fade-anim="True" className="cta-newsletter-wrap">
               <div className="cta-newsletter-title">
-                OUR NEWSLETTER
+                GET STARTED
               </div>
               <div className="cta-newsletter-box">
-                <div id="Cta-Newsletter-Form-Block" className="cta-newsletter-form-block w-form">
-                  <form id="Cta-Newsletter-Form" name="email-form" data-name="Email Form" method="get" className="cta-newsletter-form" data-wf-page-id="6a901794a3ca5e0a74527ddb" data-wf-element-id="f012f319-a8b5-fc35-20e6-c93d784542b1" data-turnstile-sitekey="0x4AAAAAAAQTptj2So4dx43e">
-                    <label htmlFor="Cta-Newsletter-Form-Email" className="display-none">
-                      {"[enter your email]"}
-                    </label>
-                    <input className="cta-newsletter-form-input w-input" maxLength={256} name="Cta-Newsletter-Form-Email" data-name="Cta-Newsletter-Form-Email" placeholder="[enter your email]" type="email" id="Cta-Newsletter-Form-Email" required />
-                    <div className="cta-newsletter-form-button-box">
-                      <input type="submit" data-wait="Please wait..." id="Cta-Newsletter-Form-Button" className="cta-newsletter-form-button w-button" value="" />
-                      <img loading="lazy" src="/assets/6a93d0b5d674c548a8d63423_button_arrow_2.svg" alt="Arrow" className="cta-newsletter-form-button-arrow" />
-                    </div>
-                  </form>
-                  <div className="cta-newsletter-form-success w-form-done">
-                    <div className="cta-newsletter-form-success-text">
-                      Thank you! Your submission has been received!
-                    </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                <a data-wf--primary-button--variant="main-button" href="/dashboard" className="primary-button w-inline-block">
+                  <div className="primary-button-text-items"><div className="primary-button-text-wrap">
+                    <div className="primary-button-text one">OPEN THE DASHBOARD</div>
+                    <div className="primary-button-text two">OPEN THE DASHBOARD</div>
+                  </div></div>
+                  <div className="primary-button-icon-wrap">
+                    <div className="primary-button-icon-box"><img src="/assets/6a940bdd07117569c26e60b8_btn_icon.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
+                    <div className="primary-button-icon-box"><img src="/assets/6a940df507117569c26eab94_btn_icon_2.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
+                    <div className="primary-button-icon-box two"><img src="/assets/6a9d5d892f159f58a1b00821_btn_icon_3.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
+                    <div className="primary-button-icon-box two"><img src="/assets/6a9d5d88f0c4f20f0444af57_btn_icon_4.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
                   </div>
-                  <div className="w-form-fail">
-                    <div>
-                      Oops! Something went wrong while submitting the form.
-                    </div>
+                </a>
+                <a data-wf--primary-button--variant="main-button" href="/race" className="primary-button w-inline-block">
+                  <div className="primary-button-text-items"><div className="primary-button-text-wrap">
+                    <div className="primary-button-text one">WATCH THE RACE</div>
+                    <div className="primary-button-text two">WATCH THE RACE</div>
+                  </div></div>
+                  <div className="primary-button-icon-wrap">
+                    <div className="primary-button-icon-box"><img src="/assets/6a940bdd07117569c26e60b8_btn_icon.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
+                    <div className="primary-button-icon-box"><img src="/assets/6a940df507117569c26eab94_btn_icon_2.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
+                    <div className="primary-button-icon-box two"><img src="/assets/6a9d5d892f159f58a1b00821_btn_icon_3.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
+                    <div className="primary-button-icon-box two"><img src="/assets/6a9d5d88f0c4f20f0444af57_btn_icon_4.svg" loading="lazy" alt="Icon" className="primary-button-icon" /></div>
                   </div>
+                </a>
                 </div>
                 <p className="cta-newsletter-text">
-                  Get build updates on agent payments, x402 on Hedera and the Klero MCP server. No spam.
+                  Sign in with World ID, link your agents, and watch three forks pay exactly once on Hedera.
                 </p>
               </div>
             </div>

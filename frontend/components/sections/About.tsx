@@ -1,6 +1,6 @@
 export default function About() {
   return (
-    <section className="home-about-sectin">
+    <section id="about" className="home-about-sectin">
       <div data-wf--section-wrap--variant="main-mood" className="section-wrap">
         <div className="container title-container top-border">
           <div className="section-title-flex">
@@ -68,7 +68,7 @@ export default function About() {
               </div>
               <div className="home-about-content-wrap">
                 <div fade-anim="True" className="home-about-content-button-box">
-                  <a data-wf--primary-button--variant="main-button" href="/app" className="primary-button w-inline-block">
+                  <a data-wf--primary-button--variant="main-button" href="/login" className="primary-button w-inline-block">
                     <div className="primary-button-text-items">
                       <div className="primary-button-text-wrap">
                         <div className="primary-button-text one">
