@@ -153,7 +153,7 @@ pnpm dev:facilitator            # :4020
 pnpm dev:scribe-a               # :4031   (also -b :4032, -premium :4033)
 pnpm dev:api                    # :4040
 
-pnpm --filter @forkos/agents link "Agent A"   # approve on your phone (World ID)
+pnpm agent:link "Agent A"   # approve on your phone (World ID)
 pnpm baseline                   # 3 independent agents -> 3 payments
 pnpm agents 3                   # 3 ForkOS agents      -> 1 payment
 ```

@@ -30,7 +30,8 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "dev:up": "bash scripts/dev-up.sh",
-    "dev:down": "bash scripts/dev-down.sh"
+    "dev:down": "bash scripts/dev-down.sh",
+    "agent:link": "pnpm --filter @forkos/agents run link"
   },
   "devDependencies": {
     "@arkiv-network/sdk": "1.0.1",

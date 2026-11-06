@@ -238,3 +238,16 @@ Login       POST /v1/owner/login/start -> poll GET /v1/owner/login/:attemptId ->
 Demo key    DEMO_KEY in backend/.env, sent out of band
 CORS        WEB_ORIGIN defaults to http://localhost:5173
 ```
+
+## P25 — `pnpm --filter @forkos/agents link` collides with pnpm's built-in `link`
+
+The doc gives the linking command as `pnpm --filter @forkos/agents link "<label>"`. pnpm resolves `link` to its
+**own** `pnpm link` command before looking at package scripts, so this fails with
+`ERROR Unknown option: 'recursive'` and never runs `apps/agents/src/link.ts`.
+
+Two fixes, both in place:
+- `pnpm --filter @forkos/agents run link "<label>"` — `run` forces script resolution.
+- A root alias `pnpm agent:link "<label>"`, which is what the README and MORNING.md now use.
+
+Note the script takes the label as its first argument, so `pnpm agent:link --help` starts a real device flow
+with the label `--help` rather than printing usage.

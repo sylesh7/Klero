@@ -36,9 +36,9 @@ cd backend
 pnpm dev:up
 
 # 1. link three agents — each prints a World link, approve on your phone
-pnpm --filter @forkos/agents link "Agent A"
-pnpm --filter @forkos/agents link "Agent B"
-pnpm --filter @forkos/agents link "Agent C"
+pnpm agent:link "Agent A"
+pnpm agent:link "Agent B"
+pnpm agent:link "Agent C"
 
 # 2. the money shot: three agents race one job, exactly one pays
 pnpm agents 3
