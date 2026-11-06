@@ -177,7 +177,7 @@ export default function Services() {
               </div>
               <div fade-anim="True" className="services-logo-items">
                 <div className="services-logo-box">
-                  <img src="/assets/klero-built-arkivsdk.svg" loading="lazy" alt="Arkiv SDK" className="services-logo" />
+                  <img src="/assets/klero-built-world.svg" loading="lazy" alt="World ID" className="services-logo" />
                 </div>
               </div>
               <div fade-anim="True" className="services-logo-items">

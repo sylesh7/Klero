@@ -30,7 +30,7 @@ export const zLoginPoll = z.object({
 });
 
 export const zAgent = z.object({
-  agentAddr: s, label: s, accountId: s, epoch: n, status: s, linkedAt: s.or(n).transform(String), arkivKey: sOpt,
+  agentAddr: s, label: s, accountId: s, epoch: n, status: s, linkedAt: s.or(n).transform(String),
 });
 export type Agent = z.infer<typeof zAgent>;
 
@@ -84,7 +84,7 @@ export type Intent = z.infer<typeof zIntent>;
 
 export const zJobClaim = z.object({
   seq: n, cts: s.optional(), agent: s, human: s.optional(), epoch: n.optional(), svc: s, price: s.or(n).transform(String),
-  arkivKey: sOpt, valid: z.boolean().optional(), reason: sOpt,
+  valid: z.boolean().optional(), reason: sOpt,
 });
 export const zJob = z.object({
   jobKey: s,
@@ -109,16 +109,12 @@ export const zCounter = z.object({
 });
 export type Counter = z.infer<typeof zCounter>;
 
+// Service directory entry from an HCS SERVICE announcement (registered provider accounts only).
 export const zService = z.object({
-  key: s, owner: s, expiresAt: s, providerId: s, capability: s, network: s, asset: s, price: s, name: s, endpoint: s, payTo: s,
+  providerId: s, name: s, capability: s, network: s, asset: s, price: s, endpoint: s, payTo: s, seq: n, cts: s,
 });
 export const zDirectory = z.object({ services: z.array(zService) });
 
-export const zBoardClaim = z.object({
-  key: s, owner: s, expiresAt: s, job: s, round: n, human: s, agent: s, status: s, epoch: n, svc: s, price: s, seq: n, tx: s,
-});
-export type BoardClaim = z.infer<typeof zBoardClaim>;
-export const zBoard = z.object({ claims: z.array(zBoardClaim) });
 
 // HCS messages are spread into each event, so only seq/cts/t are guaranteed; keep the rest as a record.
 export const zTimelineEv = z.looseObject({ seq: n, cts: s, payer: s.optional(), t: s });

@@ -134,7 +134,7 @@ function AgentsCard({ me }: { me: Me }) {
     <div className="card col">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <div className="eyebrow"><Bot size={12} /> Linked agents ({me.agents.length})</div>
-        <Pill tone="info">Linked via World · logged on HCS · mirrored on Arkiv</Pill>
+        <Pill tone="info">Linked via World · logged on HCS</Pill>
       </div>
       {me.agents.length === 0 && <p className="muted">No agents yet — run the link command.</p>}
       <table className="tbl">

@@ -83,18 +83,18 @@ export default function Blogs() {
                             November 2026
                           </div>
                           <div className="blogs-collection-title">
-                            Why Arkiv
+                            Why World ID
                           </div>
                         </div>
                         <div className="blogs-collection-content-flex">
                           <div className="paragraph-small blogs-collection-content-category">
-                            Directory
+                            Identity
                           </div>
                           <div>
-                            <img src="/assets/klero-blog-arkiv.svg" loading="lazy" alt="Why Arkiv" />
+                            <img src="/assets/klero-blog-world.svg" loading="lazy" alt="Why World ID" />
                           </div>
                           <div className="paragraph-small blogs-collection-content-text">
-                            Services, agent links and claims live on Arkiv, owned by the wallets that wrote them, so a provider can check authority before it runs a job.
+                            Every agent links to one real human with World ID, so your Claude agent and your script agent share one budget and one dedupe scope, and only you can approve what is over the cap.
                           </div>
                         </div>
                         <div className="display-none">

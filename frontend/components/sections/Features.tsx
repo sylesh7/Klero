@@ -35,7 +35,7 @@ export default function Features() {
                   Payments Built For Autonomous Agents
                 </div>
                 <p className="feature-content-description paragraph-small">
-                  Agents find paid services on Arkiv and pay over x402 with no human in the loop. They never hold payment keys: Klero signs only for the HCS winner, within the budget you set.
+                  Agents find paid services in a directory on Hedera and pay over x402 with no human in the loop. They never hold payment keys: Klero signs only for the HCS winner, within the budget you set.
                 </p>
               </div>
               <div fade-anim="True" className="feature-content-slider-wrap">

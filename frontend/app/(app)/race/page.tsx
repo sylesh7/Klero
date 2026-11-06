@@ -9,7 +9,6 @@ import { report } from '@/components/app/providers';
 import { Lanes } from '@/components/race/lanes';
 import { DeathClock, JobSteps } from '@/components/race/clock';
 import { AgentsRow } from '@/components/race/agents';
-import { Board } from '@/components/race/board';
 import { Timeline } from '@/components/race/timeline';
 import { Chaos } from '@/components/race/chaos';
 import { Feed } from '@/components/race/feed';
@@ -90,7 +89,7 @@ function Race() {
         <span className="eyebrow"><Terminal size={12} /> Operator</span>
         <span className="row"><code className="mono">pnpm baseline</code><CopyButton text="pnpm baseline" small /></span>
         <span className="row"><code className="mono">pnpm agents 3</code><CopyButton text="pnpm agents 3" small /></span>
-        <span className="small muted">Real agents run there; this screen only reads Hedera, Arkiv and HCS.</span>
+        <span className="small muted">Real agents run there; this screen only reads Hedera (HCS + Mirror Node).</span>
       </div>
 
       {!jobKey ? (
@@ -104,7 +103,6 @@ function Race() {
           </div>
           <AgentsRow job={job.data ?? null} agents={me.data?.agents ?? []} />
           <div className="grid2">
-            <Board jobKey={jobKey} agents={me.data?.agents ?? []} winnerSeq={job.data?.winner?.seq} />
             <Timeline jobKey={jobKey} job={job.data ?? null} agents={me.data?.agents ?? []} />
           </div>
           {ENV.DEMO_KEY && <Chaos jobKey={jobKey} job={job.data ?? null} agents={me.data?.agents ?? []} />}

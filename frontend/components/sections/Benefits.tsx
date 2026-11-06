@@ -118,7 +118,7 @@ export default function Benefits() {
                   One Live Authority
                 </div>
                 <p className="paragraph-small benefits-card-content-description">
-                  Agents link to their human with World ID. Firing an agent or spending above the cap needs a fresh approval, and providers check Arkiv before they run a job.
+                  Agents link to their human with World ID. Firing an agent or spending above the cap needs a fresh approval, and providers check the agent's live authority on HCS before they run a job.
                 </p>
               </div>
             </div>

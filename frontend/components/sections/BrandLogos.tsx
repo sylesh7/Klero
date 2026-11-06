@@ -11,7 +11,7 @@ export default function BrandLogos() {
               <img src="/assets/klero-partner-world.svg" loading="lazy" alt="World ID" className="brand-logo" />
             </div>
             <div scale-up="True" className="brand-logo-items">
-              <img src="/assets/klero-partner-arkiv.svg" loading="lazy" alt="Arkiv" className="brand-logo" />
+              <img src="/assets/klero-partner-mirror.svg" loading="lazy" alt="Hedera Mirror Node" className="brand-logo" />
             </div>
             <div scale-up="True" className="brand-logo-items">
               <img src="/assets/klero-partner-x402.svg" loading="lazy" alt="x402" className="brand-logo" />

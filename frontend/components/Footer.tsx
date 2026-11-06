@@ -169,13 +169,13 @@ export default function Footer() {
                       </div>
                     </div>
                   </a>
-                  <a href="https://arkiv.network" target="_blank" className="footer-page-link w-inline-block">
+                  <a href="https://world.org" target="_blank" className="footer-page-link w-inline-block">
                     <div className="footer-page-link-box">
                       <div className="footer-page-link-text one">
-                        arkiv.network
+                        world.org
                       </div>
                       <div className="footer-page-link-text two">
-                        arkiv.network
+                        world.org
                       </div>
                     </div>
                   </a>
