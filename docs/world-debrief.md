@@ -3,7 +3,27 @@
 - Issuer used: **https://auth.world.org** (production, with mocked proofs as the Mumbai track specifies)
 - Client auth method: `client_secret_post` · Flow: Device Authorization Grant (RFC 8628)
 - Accepted accounts: **Any account** (Orb-only or Selfie-Check would reject test identities)
+- Requested class on every device authorization: `acr_values=https://world.org/oidc/acr/orb-face`
+  (`WORLD_ACR_VALUES`, see "Friction" — without it the approval page only offered a passkey)
 - Subject identifiers: default pairwise sector
+
+## Approved path (live, 2026-11-06)
+
+All three protected actions completed end to end with an Orb-verified World ID on production `auth.world.org`.
+Every ID token was validated in the backend and recorded:
+
+```
+kind     status    user_code     acr                                   amr
+LINK     APPROVED  B2UGW-YQE6Y   https://world.org/oidc/acr/orb-face   ["pop","face","user","mfa"]
+LINK     APPROVED  UB9BC-NFEB4   https://world.org/oidc/acr/orb-face   ["pop","face","user"]
+LINK     APPROVED  UBSWH-V8ZJ8   https://world.org/oidc/acr/orb-face   ["pop","face","user"]
+OVERCAP  APPROVED  PUYPB-4DJDG   https://world.org/oidc/acr/orb-face   ["pop","face","user"]
+```
+
+- **Link (×3):** one human, three agents (`0.0.11335838`, `0.0.11335860`, `0.0.11335879`), each with
+  `LINK` + `APPROVAL` on HCS. Same `sub` → same `humanHash` → one budget and one dedupe scope.
+- **Over-cap payment:** approval `ap_hPKSg_jIcRKX` was bound to the digest of the exact 2.00 FUSD payment and
+  marked `USED` by the one intent it authorized. Result: one payment for three agents (see `docs/proof.md`).
 
 ## What we built with it
 
@@ -27,12 +47,29 @@ the attempt started. Device codes are stored AES-256-GCM encrypted and never lea
 | # | Path | Expected | Status |
 |---|---|---|---|
 | D1 | Cancelled / account not accepted | attempt `DENIED (access_denied)`, nothing changes | **OBSERVED** — see below |
-| D2 | Left to expire | attempt `EXPIRED`, nothing changes | <!-- fill --> |
+| D2 | Left to expire | attempt `EXPIRED`, nothing changes | **OBSERVED** — see below |
 | D3 | Identity not accepted by the app's policy | `DENIED (access_denied)` | **OBSERVED** — see below |
 | D4 | Approval replayed onto a different payment | digest mismatch -> a new approval is required; the first is never consumed | **verified by test** (`services/api/test/approvals.test.ts`) |
 | D5 | Approval used twice | `409 APPROVAL_MISMATCH (already used)` | **verified** (consumed under `for update` in one transaction) |
 
-D4 and D5 are covered by automated tests. D2 needs a 20-minute wait; D1 and D3 were observed live.
+D4 and D5 are covered by automated tests. D1, D2 and D3 were observed live.
+
+### Observed expired path (live, 2026-11-06)
+
+Several `LINK` codes were opened but never completed (the approval page asked for a passkey the user did not
+have) and ran past World's 20-minute device-code lifetime:
+
+```
+user_code     status   reason
+9FAQ4-YF5RN   EXPIRED  device code expired
+PQ29Z-VQ89E   EXPIRED  device code expired
+6UH8M-QD5N5   EXPIRED  device code expired
+G6LPJ-CKMSB   EXPIRED  expired_token
+```
+
+None of them created an agent, a Hedera account or an HCS message: exactly three agents exist, one per approved
+code. Separately, an **over-cap approval that was never approved** (`ap_QNntdDSchk1c`, round 0) left the payer
+waiting; no intent was created, no money moved, and the referee later opened round 1.
 
 ### Observed denied path (live, 2026-11-06)
 
@@ -65,6 +102,18 @@ downstream of the `APPROVED` branch in `startWorldWorker`.
 - **"Default accepted accounts" is a silent failure mode.** Leaving it on Orb means every test identity ends in
   `access_denied`, which looks identical to a user cancelling. We only knew to pick "Any account" because the
   prize text mentioned mocked proofs.
+- **The device approval page offered only "Continue with a passkey".** After the World ID app reported
+  "You have successfully shared your proofs anonymously", the browser page still showed only a passkey button and
+  "First time here? Create an account first". A user with an Orb-verified World ID but no World IdP passkey
+  could not finish, and the attempt silently stayed `authorization_pending` until it expired. The fix was in the
+  docs' step-up guide, not the device-flow guide: passkeys are offered first *unless the first requested class is
+  `orb-face` or `selfie-face`*, and the device endpoint accepts `acr_values`. Sending
+  `acr_values=https://world.org/oidc/acr/orb-face` changed the page to "Requires: Orb with face check" and the
+  approval completed. Note the user still needed a World IdP account with a passkey; the end-user account and
+  passkey setup are not described anywhere in the docs.
+- **`account_not_eligible` looks like an end-user error but is not.** Seen while trying the sandbox, it refers to
+  the *developer portal* Google account not being allowed to register a client in that environment, not to the
+  World ID trying to log in.
 - **No `nonce` in device-flow ID tokens** (correct per the spec, since there is no browser redirect) means
   freshness has to come from `auth_time`. That is easy to get wrong — a naive integration would accept a token
   minted for an earlier attempt. We pin `auth_time >= attempt.started_at - 5 s` as well as a max age.

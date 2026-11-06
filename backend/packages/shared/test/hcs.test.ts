@@ -147,7 +147,8 @@ describe('TopicFollower', () => {
       if (call === 2) throw new Error('mirror blew up mid-walk');
       return page(range(101, 120), null); // retry after the failure
     });
-    const f = new TopicFollower(new Mirror('https://m.test'), '0.0.9999');
+    // attempts: 1 so the failure reaches the follower (by default Mirror retries transient errors itself)
+    const f = new TopicFollower(new Mirror('https://m.test', { attempts: 1 }), '0.0.9999');
 
     await expect(f.sync()).rejects.toThrow(/blew up/);
     expect(f.latestSeq).toBe(100); // committed, not discarded

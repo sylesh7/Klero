@@ -85,6 +85,10 @@ export function viewJob(messages: Decoded[], jobKey: string, opts: RefereeOption
   const sorted = [...messages].sort((a, b) => a.seq - b.seq);
   let round = 0;
   let st = freshRound();
+  // A provider can refund so quickly that its REFUND reaches consensus before the operator's SETTLED for the
+  // same payment. Hold such a refund (it must still name this round's intent tx) and apply it only once the
+  // matching SETTLED arrives, so a refund still never counts for a payment that did not settle.
+  let earlyRefund: JobView['refund'] = null;
   const history: JobView['history'] = [];
   let lastSeq = 0;
   const isOp = (d: Decoded) => d.payer === opts.operatorId;
@@ -139,6 +143,8 @@ export function viewJob(messages: Decoded[], jobKey: string, opts: RefereeOption
       case 'SETTLED': {
         if (isOp(d) && m.round === round && st.intent && m.tx === st.intent.tx && !st.settled) {
           st.settled = { seq: d.seq, tx: m.tx, cts: m.cts };
+          if (earlyRefund && earlyRefund.tx === m.tx && !st.refund) st.refund = earlyRefund;
+          earlyRefund = null;
         }
         break;
       }
@@ -148,9 +154,10 @@ export function viewJob(messages: Decoded[], jobKey: string, opts: RefereeOption
       }
       case 'REFUND': {
         const trusted = !opts.providerAccounts || opts.providerAccounts.includes(d.payer);
-        if (trusted && m.round === round && st.settled && m.tx === st.settled.tx && !st.refund) {
-          st.refund = { seq: d.seq, tx: m.tx, rtx: m.rtx, amount: m.amt };
-        }
+        if (!trusted || m.round !== round || st.refund) break;
+        const refund = { seq: d.seq, tx: m.tx, rtx: m.rtx, amount: m.amt };
+        if (st.settled && m.tx === st.settled.tx) st.refund = refund;
+        else if (!st.settled && st.intent && m.tx === st.intent.tx && !earlyRefund) earlyRefund = refund;
         break;
       }
       case 'VOID': {
@@ -161,6 +168,7 @@ export function viewJob(messages: Decoded[], jobKey: string, opts: RefereeOption
           history.push({ round, tx: m.tx, seq: d.seq });
           round += 1;
           st = freshRound();
+          earlyRefund = null;
         }
         break;
       }
