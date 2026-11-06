@@ -128,6 +128,14 @@ with `iss`, `aud`, `exp` and `auth_time` freshness; step-ups pin the owner's `su
 rest and never leave the backend. Denied, expired, cancelled, wrong-human and replayed-approval paths are in
 [`docs/world-debrief.md`](docs/world-debrief.md).
 
+**World AgentKit (human-backed agents) on the x402 path.** The provider's `402` carries the standard
+`extensions.agentkit` challenge. The winning agent signs it (SIWE on World Chain) with its own key — the same key as
+its Hedera account — and the API relays the `agentkit` header without ever holding agent keys. Before anything is
+settled, the provider fence verifies the signature is fresh, single-use, issued by that provider and made by the
+winning agent, then looks the wallet up in World **AgentBook**. `PROVIDER_AGENTKIT=off | verify | require`
+(`require` serves only agents registered to a human). Code: `services/provider/src/agentkit.ts`,
+`packages/agent-kit/src/agentkit.ts`.
+
 ## Run it
 
 ```bash

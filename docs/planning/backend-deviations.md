@@ -311,3 +311,24 @@ already the source of truth for the referee and the agent links):
 
 Verified live: providers announced on HCS (seq 71–73), `/v1/directory` reads from HCS, a 3-agent race paid once
 (job `8c4e2a22…`, round 0), and `forkos audit` passed 9 jobs / 34 checks over the full topic history. 124 tests.
+
+## World AgentKit — human-backed agents on the x402 path (new)
+
+Not in the build doc. World's AgentKit extends x402 so a resource can tell human-backed agents from bots: the agent
+signs a SIWE challenge and the server resolves its wallet in World **AgentBook** (World Chain). Integrated without
+touching how payments settle:
+
+- **Provider** (`services/provider/src/agentkit.ts`): the fenced `402` carries `extensions.agentkit`
+  (`declareAgentkitExtension` + `enrichPaymentRequiredResponse`, network `eip155:480`, 5-min expiry, nonce tracked
+  as issued). On the paid request the fence checks the relayed `agentkit` header — message bound to this endpoint,
+  fresh, nonce issued here and unused, signature recovers the HCS winner — then `lookupHuman`. Modes via
+  `PROVIDER_AGENTKIT`: `off` (default), `verify` (a sent header must be valid; records the human), `require`
+  (unregistered or missing → `409 NOT_HUMAN_BACKED`). The extension is **not** registered on `x402ResourceServer`,
+  so it never participates in payment verification. Result is recorded on `prov_jobs.agentkit_*` and returned in the
+  job response.
+- **Agent** (`packages/agent-kit/src/agentkit.ts`): before each `/v1/pay` the winner fetches the provider's challenge
+  and signs it with its own key (same secp256k1 key as its Hedera account); a fresh proof per call because approvals
+  can outlast the 5-minute challenge.
+- **API**: `/v1/pay` accepts `agentkit`, stores it on the intent (`intents.agentkit_header`) and relays it on the paid
+  request. The API never signs and holds no agent keys.
+- Registration is a human step: `npx @worldcoin/agentkit-cli register <agent address>` + World App.
