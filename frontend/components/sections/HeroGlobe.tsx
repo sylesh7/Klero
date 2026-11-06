@@ -45,7 +45,7 @@ export default function HeroGlobe() {
       const z = Math.sin(t) * r;
       const lat = (Math.asin(y) * 180) / Math.PI;
       const lon = (Math.atan2(z, x) * 180) / Math.PI;
-      if (isLand(lat, lon)) pts.push([x, -y, z]);
+      if (isLand(lat, lon)) pts.push([x, -y, -z]); // flip z so the map is not mirrored
     }
     const agents = Array.from({ length: 14 }, (_, i) => pts[(i * 211 + 37) % pts.length]);
 

@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { GitFork, LogOut, Radio, WifiOff } from 'lucide-react';
+import { LogOut, Radio, WifiOff } from 'lucide-react';
 import { useConfig } from '@/lib/config';
 import { useEvents } from '@/lib/events';
 import { session, useOwner } from '@/lib/session';
@@ -24,7 +24,7 @@ export function AppShell({ title, children, right, narrow }: { title?: string; c
       {status === 'down' && <div className="sp-banner warn"><WifiOff size={16} /> Live updates are off — reconnecting…</div>}
       <header className="sp-top">
         <Link href="/" className="sp-brand" aria-label="Klero home">
-          <span className="mark"><GitFork size={16} /></span>Klero
+          <img className="mark" src="/assets/klero_mark.png" alt="" />Klero
         </Link>
         <nav className="navlinks">
           {NAV.map((n) => <Link key={n.href} href={n.href} className={path.startsWith(n.href) ? 'active' : ''}>{n.label}</Link>)}

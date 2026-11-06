@@ -60,7 +60,7 @@ html, body { margin: 0; padding: 0; background: var(--pale); }
   border-bottom: 2px solid var(--ink);
 }
 .sp-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -0.01em; font-size: 17px; }
-.sp-brand .mark { width: 26px; height: 26px; background: var(--ink); color: var(--neon); display: grid; place-items: center; }
+.sp-brand .mark { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--ink); object-fit: cover; display: block; }
 .sp-top .title { flex: 1; text-align: center; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; }
 .sp-icon-btn { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--ink); background: transparent; }
 .sp-icon-btn:hover { background: var(--ink); color: var(--pale); }
