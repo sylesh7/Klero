@@ -34,14 +34,47 @@ export type MirrorTopicMessage = {
   chunk_info?: { number: number; total: number } | null;
 };
 
+export type MirrorOptions = {
+  /** Per-attempt deadline. Without one, a silently stalled connection hangs for undici's 300 s default. */
+  timeoutMs?: number;
+  /** Total attempts for network errors, timeouts and 5xx. 404 and other 4xx are answers, never retried. */
+  attempts?: number;
+  retryDelayMs?: number;
+};
+
 export class Mirror {
-  constructor(readonly baseUrl: string = DEFAULT_MIRROR_URL) {}
+  private readonly timeoutMs: number;
+  private readonly attempts: number;
+  private readonly retryDelayMs: number;
+
+  constructor(readonly baseUrl: string = DEFAULT_MIRROR_URL, opts: MirrorOptions = {}) {
+    this.timeoutMs = opts.timeoutMs ?? 15_000;
+    this.attempts = Math.max(1, opts.attempts ?? 3);
+    this.retryDelayMs = opts.retryDelayMs ?? 1_000;
+  }
 
   private async get<T>(path: string): Promise<{ status: 200; body: T } | { status: 404 }> {
-    const res = await fetch(`${this.baseUrl}${path}`, { headers: { accept: 'application/json' } });
-    if (res.status === 404) return { status: 404 };
-    if (!res.ok) throw new Error(`Mirror ${res.status} for ${path}: ${(await res.text()).slice(0, 300)}`);
-    return { status: 200, body: (await res.json()) as T };
+    let lastErr: unknown;
+    for (let attempt = 1; attempt <= this.attempts; attempt++) {
+      let res: Response;
+      try {
+        res = await fetch(`${this.baseUrl}${path}`, {
+          headers: { accept: 'application/json' },
+          signal: AbortSignal.timeout(this.timeoutMs),
+        });
+      } catch (e) {
+        lastErr = e; // network error or timeout: transient, try again
+        if (attempt < this.attempts) await new Promise((r) => setTimeout(r, this.retryDelayMs * attempt));
+        continue;
+      }
+      if (res.status === 404) return { status: 404 };
+      if (res.ok) return { status: 200, body: (await res.json()) as T };
+      const err = new Error(`Mirror ${res.status} for ${path}: ${(await res.text()).slice(0, 300)}`);
+      if (res.status < 500) throw err; // a 4xx is an answer, not an outage
+      lastErr = err;
+      if (attempt < this.attempts) await new Promise((r) => setTimeout(r, this.retryDelayMs * attempt));
+    }
+    throw lastErr instanceof Error ? lastErr : new Error(`Mirror request failed for ${path}`);
   }
 
   /** Look up an SDK tx id. PAID if any non-scheduled, nonce-0 entry has result SUCCESS. */

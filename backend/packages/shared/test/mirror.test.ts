@@ -193,3 +193,65 @@ describe('Mirror.getTransaction', () => {
     expect(r.found && r.result).toBe('INSUFFICIENT_TOKEN_BALANCE');
   });
 });
+
+describe('Mirror — timeouts and retries (a stalled connection used to hang for 300 s)', () => {
+  const okTx = () =>
+    new Response(JSON.stringify({ transactions: [{ result: 'SUCCESS', consensus_timestamp: '1.2', nonce: 0, scheduled: false }] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+  const fast = { timeoutMs: 50, attempts: 3, retryDelayMs: 1 };
+
+  it('retries a network error and then succeeds', async () => {
+    let calls = 0;
+    vi.stubGlobal('fetch', async () => {
+      if (++calls === 1) throw new TypeError('fetch failed');
+      return okTx();
+    });
+    const r = await new Mirror('https://m.test', fast).getTransaction('0.0.9@1.000000001');
+    expect(r.found).toBe(true);
+    expect(calls).toBe(2);
+  });
+
+  it('aborts a stalled request after timeoutMs and retries it', async () => {
+    let calls = 0;
+    vi.stubGlobal('fetch', (_u: string, init?: { signal?: AbortSignal }) => {
+      if (++calls === 1)
+        return new Promise<Response>((_res, rej) => init?.signal?.addEventListener('abort', () => rej(init.signal!.reason)));
+      return Promise.resolve(okTx());
+    });
+    const r = await new Mirror('https://m.test', fast).getTransaction('0.0.9@1.000000001');
+    expect(r.found).toBe(true);
+    expect(calls).toBe(2);
+  });
+
+  it('retries a 5xx, and gives up after the last attempt', async () => {
+    let calls = 0;
+    vi.stubGlobal('fetch', async () => {
+      calls++;
+      return new Response('upstream down', { status: 503 });
+    });
+    await expect(new Mirror('https://m.test', fast).getTransaction('0.0.9@1.000000001')).rejects.toThrow(/Mirror 503/);
+    expect(calls).toBe(3);
+  });
+
+  it('never retries a 404: it is an answer (the VOID proof rests on it)', async () => {
+    let calls = 0;
+    vi.stubGlobal('fetch', async () => {
+      calls++;
+      return new Response('{}', { status: 404 });
+    });
+    expect((await new Mirror('https://m.test', fast).getTransaction('0.0.9@1.000000001')).found).toBe(false);
+    expect(calls).toBe(1);
+  });
+
+  it('never retries a 400', async () => {
+    let calls = 0;
+    vi.stubGlobal('fetch', async () => {
+      calls++;
+      return new Response('bad', { status: 400 });
+    });
+    await expect(new Mirror('https://m.test', fast).getTransaction('0.0.9@1.000000001')).rejects.toThrow(/Mirror 400/);
+    expect(calls).toBe(1);
+  });
+});
