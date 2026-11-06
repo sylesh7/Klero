@@ -7,7 +7,7 @@ import { clock, formatToken, hs, short, toUnix } from '@/lib/format';
 import type { Counter } from '@/lib/types';
 
 export function Lanes({ jobKey, since }: { jobKey: string; since: number }) {
-  const q = useQuery({ queryKey: ['race', 'counter', jobKey, since], queryFn: () => api.counter(jobKey, since), refetchInterval: 4000 });
+  const q = useQuery({ queryKey: ['race', 'counter', jobKey, since], queryFn: () => api.counter(jobKey, since), refetchInterval: 4000, refetchIntervalInBackground: true });
   const c = q.data;
   return (
     <div className="grid2">

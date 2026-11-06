@@ -61,7 +61,7 @@ function Race() {
     if (e.type === 'agent.revoked') qc.invalidateQueries({ queryKey: ['me'] });
   });
 
-  const job = useQuery({ queryKey: ['race', 'job', jobKey], queryFn: () => api.job(jobKey!), enabled: !!jobKey, refetchInterval: 3000 });
+  const job = useQuery({ queryKey: ['race', 'job', jobKey], queryFn: () => api.job(jobKey!), enabled: !!jobKey, refetchInterval: 3000, refetchIntervalInBackground: true });
 
   return (
     <div className="col gap-l">
