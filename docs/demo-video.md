@@ -1,137 +1,127 @@
 # Klero — recording the 3-minute demo video
 
-**The one idea:** three agents try to buy the same meeting transcript. Without Klero they pay **3 times**.
-With Klero they pay **once** — even when we kill the payer mid-payment — and anyone can verify it.
+**The one idea:** three AI agents try to buy the same meeting transcript. Without Klero they pay **3 times**.
+With Klero they pay **once** — even when we kill the payer mid-payment — every paying agent is proven to belong to
+a real human, and anyone can verify the whole thing.
+
+**Sponsors on screen:** **Hedera** (HCS referee + directory, HTS token, x402 settlement, Mirror Node) and
+**World** (World ID linking + approvals, World AgentKit human-backed agents).
 
 **ETHGlobal rules:** 2–4 minutes · at least 720p · your own voice · **no speed-up** · no music-only stretches.
-Cuts are fine: record in scenes and cut out every wait. Never speed anything up.
+Record in scenes and **cut** the waits. Never speed anything up.
 
-> **On-screen naming.** The product is **Klero**. The right-hand lane on the race page is still labelled
-> **"ForkOS"**, and some commands say `forkos` (`pnpm forkos audit`, memo `forkos:<job>:r0`) — that's the
-> protocol prefix. On camera call it "the Klero lane"; don't comment on the label.
+> **Repository:** https://github.com/sylesh7/Klero (branch `main`). Local folder: `D:\Projects\Klero-1`.
+> **Naming:** the product is **Klero**. The race page's right lane is still labelled **"ForkOS"** and some commands
+> say `forkos` (`pnpm forkos audit`, memo `forkos:<job>:r0`) — that is the protocol prefix. Say "the Klero lane".
 
 ---
 
-## Part 1 — Set-up (once, ~20 min)
+## Part 1 — Set-up (once, ~15 min)
 
 ### 1.1 You must be the only backend running ⚠️
 
-Every copy of the backend that holds the operator key watches the same public HCS topic. If a teammate's API
-is running an older version, it **closes your rounds 60 s after the claims** — your World approval then lands on
-a dead round and the agents start over. **Before recording, message the team: "stop `pnpm dev:api` until I'm
-done"** (everyone on `main` after PR #3 is safe, but it's simplest if only you run it).
+Every copy of the backend holding the operator key watches the same public HCS topic. An old teammate copy can
+close your rounds while you are approving. **Before recording, tell the team to stop their backend.**
 
-### 1.2 Start the stack
+### 1.2 Start everything — one command each
 
-Open **PowerShell** in `D:\Projects\Klero-1\backend`. In **every** backend terminal, run this first or `pnpm`
-hangs:
+Start **Docker Desktop** first. Then, in PowerShell:
 
 ```powershell
-$env:npm_config_script_shell = "C:\Program Files\Git\bin\bash.exe"
+# backend: Postgres + migrations, facilitator, 3 providers, API (hidden, logs in backend\.logs\)
+powershell -ExecutionPolicy Bypass -File D:\Projects\Klero-1\backend\scripts\win\dev-up.ps1
+
+# frontend (separate window)
+cd D:\Projects\Klero-1\frontend; npm run dev
 ```
 
-| Terminal | Command | Ready when |
-|---|---|---|
-| 1 | `docker compose up -d db` (then reuse this terminal for commands) | prints `Started` / `Running` |
-| 2 | `pnpm dev:facilitator` | http://localhost:4020/health → `ok` |
-| 3 | `pnpm dev:scribe-a` | http://localhost:4031/health |
-| 4 | `pnpm dev:scribe-b` (start ~10 s after scribe-a) | http://localhost:4032/health |
-| 5 | `pnpm dev:scribe-premium` (~10 s later) | http://localhost:4033/health |
-| 6 | `pnpm dev:api` | http://localhost:4040/v1/health |
-| 7 | `cd ..\frontend; npm run dev` | http://localhost:3000 opens |
+`dev-up.ps1` ends with **"Klero backend is up."**, the HCS directory (3 services), `AgentKit mode require` and the
+current demo meeting. If it prints a **WARNING** about a baseline wallet, top it up (1.4). Stop everything with
+`scripts\win\dev-down.ps1`.
 
-Check http://localhost:4040/v1/directory lists **3 services**. Terminal 1 is your **command terminal** from
-now on (backend folder, script-shell line done).
+### 1.3 World AgentKit check (already done for Agents A, B, C)
 
-### 1.3 Paste the helper (command terminal)
-
-Every scene needs a meeting that has **never been paid** — a paid meeting skips straight to "already paid".
-`Use-Meeting <n>` makes meeting *n* (if needed), points the API at it and restarts the API in a new window.
+`backend\.env` has `PROVIDER_AGENTKIT=require`: providers only serve agents whose wallet is registered to a human in
+**World AgentBook**. All three agents are registered to the same World ID. If you ever link a new agent, register it:
 
 ```powershell
-function Use-Meeting($n) {
-  $f = "services\provider\public\video-$n.mp3"
-  if (-not (Test-Path $f)) { ffmpeg -loglevel error -y -i services\provider\public\sample-meeting.mp3 -b:a 128k -metadata title="video-$n" $f }
-  $t = (Get-Content .env -Raw) -replace '(?m)^SAMPLE_AUDIO_URL=.*$', "SAMPLE_AUDIO_URL=http://localhost:4031/video-$n.mp3"
-  [IO.File]::WriteAllText("$PWD\.env", $t)
-  Get-NetTCPConnection -LocalPort 4040 -State Listen -EA SilentlyContinue | % { $p = Get-CimInstance Win32_Process -Filter "ProcessId=$($_.OwningProcess)"; Stop-Process -Id $p.ProcessId,$p.ParentProcessId -Force -EA SilentlyContinue }
-  Start-Process powershell -ArgumentList '-NoExit','-Command',"`$env:npm_config_script_shell='C:\Program Files\Git\bin\bash.exe'; cd '$PWD'; pnpm dev:api"
-  "video-$n ready. Wait ~20 s (all services reload), check http://localhost:4040/v1/health, then click Load demo job."
-}
+npx @worldcoin/agentkit-cli register <agent address>
 ```
 
-Meetings **video-5** and earlier are already paid. Start at **7** and count up for every scene and retake.
+### 1.4 Commands you'll use (keep a terminal in `D:\Projects\Klero-1\backend`)
 
-### 1.4 Screen, browser, phone
+| Need | Command |
+|---|---|
+| A fresh, never-paid meeting (restarts only the API, ~15 s) | `powershell -ExecutionPolicy Bypass -File scripts\win\use-meeting.ps1 -N 21` |
+| Top up the baseline wallets (each baseline run uses up to ~4 FUSD) | `powershell -ExecutionPolicy Bypass -File scripts\win\topup-baseline.ps1` |
+| Run the agents / baseline / audit | first `$env:npm_config_script_shell = "C:\Program Files\Git\bin\bash.exe"`, then `pnpm baseline`, `pnpm agents 3`, `pnpm forkos audit …` |
 
-- [ ] Signed in at http://localhost:3000/login with World ID; **/dashboard shows Agent A, B, C — ACTIVE**
-- [ ] Browser tabs, in this order: **1** http://localhost:3000 · **2** /dashboard · **3** /race ·
-      **4** https://hashscan.io/testnet/topic/0.0.11332888
-- [ ] Browser zoom so the two lanes and the job steps fit on one screen (≈ 80–90 %)
-- [ ] Terminal: font ≥ 18, dark theme, window placed **next to** the browser (both visible)
-- [ ] Phone unlocked, World App open, ready for "Continue with a passkey"
-- [ ] Notifications off, recording at 1920×1080
+Meetings up to **20 are used** — start at **21** and count up for every scene and retake.
 
-### 1.5 Dry run (do this once, don't record)
+### 1.5 Screen, browser, phone
 
-Run Scene A once start to finish. It confirms World approvals work, the lanes update, and you know where to
-click. Then move to fresh meetings for the real takes.
+- [ ] Signed in at http://localhost:3000/login with World ID — **/dashboard shows Agent A, B, C ACTIVE**
+- [ ] Browser tabs: **1** http://localhost:3000 · **2** /dashboard · **3** /race · **4** https://hashscan.io/testnet/topic/0.0.11332888
+- [ ] Browser zoom ~80–90 % so both lanes and the job steps fit
+- [ ] Terminal next to the browser (both visible), font ≥ 18
+- [ ] Phone unlocked, World App open (over-cap approvals: "Continue with a passkey" → approve)
+- [ ] Notifications off, 1920×1080
+
+### 1.6 Dry run (don't record)
+
+Run Scene A once end to end. It confirms World approvals, AgentKit and the lanes all work. Then use fresh meetings.
 
 ---
 
-## Part 2 — The script
+## Part 2 — The script (3:00)
 
-Record **three scenes separately** and cut them together. Narration is ~420 words at a calm pace.
-**Bold** = stress it.
+Three scenes recorded separately and cut together. **Bold** = stress it.
 
-### Scene A (0:00 – 1:35) · hook → baseline → Klero
+### Scene A (0:00 – 1:40) · hook → baseline → Klero
 
 **Before you press record**
-
-1. Command terminal: `Use-Meeting 7` → wait ~20 s → http://localhost:4040/v1/health is `ok`.
-2. Tab 3 (/race): click **Load demo job** → job id appears, status **`OPEN`**, both lanes **0**,
-   "Claims on HCS (0)".
+1. `scripts\win\use-meeting.ps1 -N 21` → "Ready".
+2. Tab 3 (/race): click **Load demo job** → job id, **round 0**, **`OPEN`**, pill **"counting since HH:MM:SS"**, both lanes **0**.
 3. Switch to Tab 1. Press record.
 
 | Time | Screen | Do | You should see | Say |
 |---|---|---|---|---|
 | 0:00 | Tab 1, landing page | Slow scroll to the "Payments settled: 1" widget | — | "AI agents now pay for things on their own. But when two of your agents buy the same thing — or a payment times out halfway — **did you pay once, twice, or not at all?** Nobody can answer that today. Klero can." |
 | 0:15 | Tab 3, /race | — | job `OPEN`, lanes 0 / 0 | "One meeting recording, three agents. First, how agents pay today: each has its own wallet and the standard x402 client." |
-| 0:22 | Terminal | `pnpm baseline` | 3 "LLM chose …" lines, then a table with 3 tx ids *(~30 s — cut)* | — |
-| 0:28 | /race left lane | Point at the lane | **Baseline lane → 3** | "Three agents, three decisions, **three payments for the same meeting.** x402 stops a retry of one request — it can't stop three agents buying one job." |
+| 0:22 | Terminal | `pnpm baseline` | 3 "LLM chose …" lines, a table with 3 tx ids *(~30 s — cut)* | — |
+| 0:28 | /race left lane | Point at it | **Baseline lane → 3** (refreshes every few seconds) | "Three agents, three decisions, **three payments for the same meeting.** x402 stops a retry of one request — it can't stop three agents buying one job." |
 | 0:45 | Tab 2, /dashboard | Point at the three agents | 3 agents, one budget | "Now the same three agents with Klero. Each was linked to me once with **World ID** — so Klero knows they belong to one human, with one budget." |
 | 0:55 | Terminal | `pnpm agents 3` | "claimed round 0 … (HCS seq N)" ×3, then "WON" / "lost" | — |
-| 1:00 | /race: job steps + referee log (HCS) | Point at the claims, then the winner | "Claims on HCS (3)", 3 CLAIM rows in the referee log, one winner | "Every agent posts a claim on a **Hedera Consensus Service** topic, from its own Hedera account. Consensus order is the referee: **first valid claim wins**, and everyone computes the same winner from public data." |
+| 1:00 | /race: job steps + referee log | Point at the claims, then the winner | "Claims on HCS (3)", 3 CLAIM rows, one winner | "Every agent posts a claim on a **Hedera Consensus Service** topic, from its own Hedera account. Consensus order is the referee: **first valid claim wins**, and everyone computes the same winner from public data." |
 
 **Then one of two things happens — the winner is random:**
 
-| If… | Screen / Do | Say |
+| If… | Do | Say |
 |---|---|---|
-| **A. An approval sheet pops up** (the winner chose Scribe Premium, 2.00 FUSD — happens most takes) | Sheet shows QR + code. On the phone: open the **latest** link from the terminal (or scan the QR), check the code matches, **Continue with a passkey → approve**. You may close the sheet to watch the race — that does **not** deny it. *(Cut the wait.)* | "This agent picked the premium service — over my 1 FUSD cap. So it needs **me**: a fresh World ID approval, bound to this exact payment." |
-| **B. No sheet** (the cheapest agent won, 0.04 FUSD) | Nothing to do | "The winner picked the cheapest service — under my cap, so no human needed." |
+| **A. An approval sheet pops up** (winner chose Scribe Premium, 2.00 FUSD — most takes) | Open the **latest** link from the terminal (or scan the sheet's QR), check the code, **Continue with a passkey → approve** within 5 min. Closing the sheet keeps the request open — **never press "Deny this payment"**. *(Cut the wait.)* | "This agent picked the premium service — over my 1 FUSD cap. So it needs **me**: a fresh World ID approval, bound to this exact payment." |
+| **B. No sheet** (cheapest agent won, 0.04 FUSD) | Nothing | "The winner picked the cheapest service — under my cap, so no human needed." |
 
 | Time | Screen | Do | You should see | Say |
 |---|---|---|---|---|
-| 1:15 | /race right lane + terminal table | Point at the lane, then `PAID_BY_ME` / `PAID_BY_OTHER` ×2 | **Klero lane → 1**, job **`DONE`** | "One agent paid. The other two got the result **without paying.** And both counters come from **Hedera Mirror Node** — not our database." |
-| 1:25 | Click **Proof →** (next to the death clock) → **HashScan → open** | Show the tx | `SUCCESS`, valid duration 120 s | "Settled in our own HTS token, through our own x402 facilitator. Here it is on HashScan." |
+| 1:15 | /race right lane + terminal table | Point at the lane, then `PAID_BY_ME` / `PAID_BY_OTHER` ×2 | **Klero lane → 1**, job **`DONE`** | "One agent paid. The other two got the result **without paying.** Both counters come from **Hedera Mirror Node** — not our database." |
+| 1:25 | Click **Proof →** (next to the death clock) | Point at the **World AgentKit** row | **"✓ human-backed · AgentBook 0x69ad…"** | "And before taking a cent, the provider checked **World AgentKit**: this agent's wallet is registered to a real human in World's AgentBook. Bots don't get served." |
+| 1:33 | **HashScan → open** | Show the tx | `SUCCESS`, valid duration 120 s | "Settled in our own HTS token, through our own x402 facilitator." |
 
 Stop recording.
 
-### Scene B (1:35 – 2:25) · "try to make us pay twice"
+### Scene B (1:40 – 2:25) · "try to make us pay twice"
 
 **Before you press record**
-
-1. Command terminal: `Use-Meeting 8` → wait ~20 s → health `ok`.
-2. Tab 3: click **Load demo job** → status `OPEN`. Scroll so the **chaos panel** and the **job steps** are both
-   visible. Press record.
+1. `scripts\win\use-meeting.ps1 -N 22` → "Ready".
+2. Tab 3: click **Load demo job** → `OPEN`. Scroll so the **chaos panel** and the **job steps** are both visible.
 
 | Time | Screen | Do | You should see | Say |
 |---|---|---|---|---|
-| 1:35 | Chaos panel | Click **Kill next payer** | "Armed: kill next payer" | "Now let's break it. I'll kill the payer's connection **400 milliseconds after it sends the money.**" |
-| 1:40 | Terminal | `pnpm agents 3` | claims, a winner; terminal says **`PAYMENT_UNKNOWN → waiting for the resolver`** *(if an approval sheet appears, approve it — cut)* | — |
-| 1:50 | /race job steps + death clock | Point at the clock | status `PAYMENT_UNKNOWN`, clock counting down from 120 s | "The payer doesn't know if it paid. Most systems retry — and pay twice. We **never re-sign.** Every payment has a transaction id we chose in advance, and it **dies 120 seconds** after it starts." |
-| 2:05 | /race | — *(cut the wait)* | status **`DONE`**, Klero lane **1** | "The resolver asks Mirror Node. Found → paid. Not found after the clock → **provably void, forever.** No third state. Still **one** payment." |
-| 2:15 | Chaos panel | Click **Replay** — **within 2 minutes** of the payment | result `forkos_replay_detected` | "And replaying the exact same signed payment? **Refused.**" |
+| 1:40 | Chaos panel | Click **Kill next payer** | "Armed: kill next payer" | "Now let's break it. I'll kill the payer's connection **400 milliseconds after it sends the money.**" |
+| 1:45 | Terminal | `pnpm agents 3` | a winner, then **`PAYMENT_UNKNOWN → waiting for the resolver`** *(approve if a sheet appears — cut)* | — |
+| 1:52 | /race: status + **death clock** | Point at the clock | `PAYMENT_UNKNOWN`, clock counting down from 120 s | "The payer doesn't know if it paid. Most systems retry — and pay twice. We **never re-sign.** Every payment has a transaction id we chose in advance, and it **dies 120 seconds** after it starts." |
+| 2:05 | /race | — *(cut the wait)* | **`DONE`**, Klero lane **1** | "The resolver asks Mirror Node. Found → paid. Not found after the clock → **provably void, forever.** Still **one** payment." |
+| 2:15 | Chaos panel | Click **Replay** — **within 2 minutes** | `forkos_replay_detected` | "And replaying the exact same signed payment? **Refused.**" |
 
 Stop recording.
 
@@ -139,16 +129,16 @@ Stop recording.
 
 | Time | Screen | Do | You should see | Say |
 |---|---|---|---|---|
-| 2:25 | Terminal | `pnpm forkos audit --topic 0.0.11332888 --operator 0.0.5899352 --providers 0.0.11332881,0.0.11332882,0.0.11332883` | rows of ✓, ends with **`ALL PASSED`** *(~20 s — cut)* | "You don't have to trust our server. Anyone can rebuild every job from the public topic and re-check every payment on the ledger." |
+| 2:25 | Terminal | `pnpm forkos audit --topic 0.0.11332888 --operator 0.0.5899352 --providers 0.0.11332881,0.0.11332882,0.0.11332883` | rows of ✓, ending **`ALL PASSED`** *(~20 s — cut)* | "You don't have to trust our server. Anyone can rebuild every job from the public topic and re-check every payment on the ledger." |
 | 2:40 | Terminal | Highlight `ALL PASSED` | — | "**All passed.**" |
-| 2:45 | Tab 1 (landing) or a title card | — | — | "**Hedera** for the referee, the death clock and settlement. **World ID** so every agent belongs to a real human. A spoof-proof service directory on HCS, too. Klero ships as an MCP server, an agent kit and a CLI. **Agents fork. Money doesn't.**" |
+| 2:45 | Tab 1 (landing) or a title card | — | — | "**Hedera** for the referee, the death clock and settlement. **World** so every agent belongs to a real human — World ID to link and approve, AgentKit so only human-backed agents get served. Klero ships as an MCP server, an agent kit and a CLI. **Agents fork. Money doesn't.**" |
 
 ---
 
 ## Part 3 — Retakes
 
-A scene can't be repeated on the same meeting (it's paid now). For a retake: `Use-Meeting <next number>`,
-wait ~20 s, **Load demo job**, record again. Meetings are cheap — use as many as you need.
+A paid meeting can't be reused. For a retake: `scripts\win\use-meeting.ps1 -N <next>` → **Load demo job** → record.
+After 3–4 baseline runs, run `scripts\win\topup-baseline.ps1`.
 
 ---
 
@@ -156,27 +146,30 @@ wait ~20 s, **Load demo job**, record again. Meetings are cheap — use as many 
 
 | Symptom | Cause → fix |
 |---|---|
-| A `pnpm` command hangs at the start | Terminal is missing the `npm_config_script_shell` line |
+| `dev-up.ps1`: "Docker is not running" | Start Docker Desktop, run it again |
+| `dev-up.ps1`: a service shows **FAIL** | Read `backend\.logs\<service>.log`; run `dev-up.ps1` again (it stops leftovers first) |
+| A `pnpm` command hangs at the start | That terminal is missing `$env:npm_config_script_shell = "C:\Program Files\Git\bin\bash.exe"` |
 | `ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND` | You're in the repo root → `cd backend` |
-| **Load demo job** shows `DONE` instantly | That meeting is already paid → `Use-Meeting <new n>` |
-| Can't find **New race** | It only appears once a job is locked. You rarely need it: Load demo job already starts the counters at "now" |
-| Baseline ran but its lane shows 0 | **New race** was clicked *after* the baseline (window reset). Reload the job, run `pnpm baseline` again, don't click New race afterwards |
+| **Load demo job** shows `DONE` instantly | That meeting is already paid → `use-meeting.ps1 -N <new>` |
+| **New race** — what does it do? | Restarts the counting window at "now" (the pill and a toast confirm it). Not needed after **Load demo job** |
+| Baseline ran but its lane shows 0 | New race was clicked *after* the baseline. Click New race, run `pnpm baseline` again |
+| Baseline shows **402** for some agents | A baseline wallet is out of FUSD → `topup-baseline.ps1`, run again |
 | "Claims on HCS (0)" after `pnpm baseline` | Expected — only `pnpm agents 3` posts claims |
-| Terminal says "claimed round 1, 2, 3…" and new approval links keep appearing | Rounds are being closed: another teammate's old API is running → ask them to stop it, then `Use-Meeting <new n>` |
-| You approved but nothing continued | You approved an **older** link (dead round). Always use the **latest** link and match the code |
-| Approval sheet closed by accident | Fine — the request is still open; approve from the terminal link |
-| Payment stays `PAYMENT_UNKNOWN` | That's the feature — resolves to PAID or VOID within ~3 min. Cut the wait |
+| Agents fail with **`NOT_HUMAN_BACKED`** | That agent's wallet isn't in World AgentBook → `npx @worldcoin/agentkit-cli register <address>` (or set `PROVIDER_AGENTKIT=verify` and rerun `dev-up.ps1`) |
+| "claimed round 1, 2, 3…" and new approval links keep appearing | Another backend is closing your rounds → ask teammates to stop theirs, then a fresh meeting |
+| You approved but nothing continued | You approved an **older** link — always use the **latest** one and match the code |
+| Payment stays `PAYMENT_UNKNOWN` | That's the feature — resolves to PAID or VOID within ~3 min. Cut |
 | Replay says `forkos_intent_expired` | More than 2 min passed. Still refused — say "refused", or retake Scene B |
-| API window won't start: port 4040 in use | Run `Use-Meeting <same n>` again — it kills the old API first |
-| A terminal prints a 5-minute timeout error | A dropped connection to Mirror Node (now retried automatically); check /race — the payment usually finished |
-| Browser: "Cannot reach the Klero API" | API window not up yet (wait 20 s), or the frontend isn't on port 3000 |
+| Browser: "Cannot reach the Klero API" | Backend not up (`dev-up.ps1`), or the frontend isn't on port 3000 |
+| Mirror Node returns `502` in the logs | Hedera's public Mirror Node is having a moment; Klero retries automatically. Wait, or cut |
 
 ---
 
 ## Part 5 — After recording
 
-- [ ] Final length 2:00–4:00, 720p+, your voice throughout, **cuts only, no speed-up**
-- [ ] One HashScan transaction is on screen and readable
-- [ ] Baseline **3** and Klero **1** are both clearly visible at some point
+- [ ] Length 2:00–4:00, 720p+, your voice throughout, **cuts only, no speed-up**
+- [ ] One HashScan transaction readable on screen
+- [ ] Baseline **3** and Klero **1** both clearly visible at some point
+- [ ] The **World AgentKit ✓ human-backed** row visible on the proof page
 - [ ] Copy the settled tx ids from your takes into `docs/proof.md`
-- [ ] Tell the team they can restart their APIs
+- [ ] Tell the team they can restart their backends

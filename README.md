@@ -157,6 +157,16 @@ pnpm agents 3                   # 3 ForkOS agents      -> 1 payment
 
 `pnpm test` runs the suite; `pnpm typecheck` checks the whole workspace.
 
+**Windows, one command** (after setup; Docker Desktop running) — starts Postgres + migrations, the facilitator, the
+three providers and the API in the background, waits for every health check and warns if a baseline wallet is low:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\scripts\win\dev-up.ps1     # stop: backend\scripts\win\dev-down.ps1
+```
+
+Also in `backend\scripts\win\`: `use-meeting.ps1 -N <n>` (fresh demo meeting) and `topup-baseline.ps1`.
+The full demo walkthrough is [`docs/demo-video.md`](docs/demo-video.md).
+
 ## Limitations (honest)
 
 - **Testnet only.** Nothing here has handled real money.
