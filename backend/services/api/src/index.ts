@@ -2,11 +2,18 @@ import cors from '@fastify/cors';
 import { ApiError, NETWORK, portFrom } from '@forkos/shared';
 import Fastify from 'fastify';
 import { ZodError } from 'zod';
-import { env, WEB_ORIGINS } from './config';
 import { follower } from './clients';
+import { env, WEB_ORIGINS } from './config';
 import { registerSse } from './events';
+import { onNewMessages } from './feed';
+import { startResolver } from './resolver';
 import { registerAgentRoutes } from './routes/agents';
+import { registerChaosRoutes } from './routes/chaos';
+import { registerCounterRoutes } from './routes/counter';
+import { registerDemoRoutes } from './routes/demo';
+import { registerJobRoutes } from './routes/jobs';
 import { registerOwnerRoutes } from './routes/owner';
+import { registerPayRoutes } from './routes/pay';
 import { registerPolicyRoutes } from './routes/policy';
 import { startWorldWorker } from './world';
 
@@ -27,21 +34,21 @@ app.setErrorHandler((err, req, reply) => {
   return reply.code(500).send({ error: { code: 'UPSTREAM_FAILED', message: (err as Error).message } });
 });
 
-app.get('/v1/health', async () => ({
-  ok: true,
-  network: NETWORK,
-  topicId: env.HCS_TOPIC_ID,
-  asset: env.PAY_ASSET,
-  hcsSeq: follower.latestSeq,
-  version: '0.1.0',
-}));
+app.get('/v1/health', async () => ({ ok: true, network: NETWORK, topicId: env.HCS_TOPIC_ID, asset: env.PAY_ASSET, hcsSeq: follower.latestSeq, version: '0.1.0' }));
 
 registerSse(app);
 registerOwnerRoutes(app);
 registerAgentRoutes(app);
 registerPolicyRoutes(app);
-startWorldWorker(app.log);
-follower.start(2000, () => {});
+registerJobRoutes(app);
+registerPayRoutes(app);
+registerCounterRoutes(app);
+registerDemoRoutes(app);
+registerChaosRoutes(app);
 
-const port = portFrom('API_PORT', 4000);
+follower.start(2000, onNewMessages);
+startWorldWorker(app.log);
+startResolver(app.log);
+
+const port = portFrom('API_PORT', 4040);
 await app.listen({ host: '0.0.0.0', port });

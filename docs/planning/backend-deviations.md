@@ -213,3 +213,28 @@ Verified without a phone:
 `services/api/test/approvals.test.ts` adds two cases beyond the doc's two: a `REVOKE` approval digest can
 never collide with an `OVERCAP` one, and the digest binds `fromEpoch`, so an approval to fire epoch 1
 cannot be replayed to fire epoch 2.
+
+## P29–P34 — no deviations; H1 (frontend handoff) is ready
+
+`routes/chaos.ts` exists as an empty registrar so `index.ts` is the doc's final shape; the real panel lands
+in P39.
+
+Verified live:
+- `/v1/config` returns the bootstrapped topic, operator, FUSD asset and all three providers.
+- `/v1/directory` returns the three services **read from Arkiv**, not from config.
+- `/v1/demo/job` hashes the real sample audio and is 403 without the demo key.
+- `/v1/counter` is computed from **Mirror Node**: with the P15 smoke payment in range it reports
+  `baseline: 1 payment` and names the exact transaction and recipient. That is the number the demo screen
+  shows, and it never reads our database.
+- The resolver and topic follower run clean (no `resolver tick failed`, no `[topic-follower]` errors).
+
+### H1 handoff for the frontend
+
+```
+API base    http://localhost:4040        (NOT 4000 - see the P23 note)
+SSE         GET /v1/events               (Last-Event-ID replay supported)
+Contract    ICD-7 endpoints, ICD-8 events, ICD-11 states - all implemented as written
+Login       POST /v1/owner/login/start -> poll GET /v1/owner/login/:attemptId -> token
+Demo key    DEMO_KEY in backend/.env, sent out of band
+CORS        WEB_ORIGIN defaults to http://localhost:5173
+```
