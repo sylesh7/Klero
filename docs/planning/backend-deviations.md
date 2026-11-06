@@ -157,3 +157,24 @@ One test fix: `Network` in `@x402/core` is the template type `` `${string}:${str
 
 `scripts/smoke-pay.ts` reads the baseline payer key from either the structured secrets shape or the flat
 incremental log written by the crash-safe bootstrap.
+
+## P16–P22 — provider built straight to the fenced version
+
+The doc stages the provider through stubs (P17 challenge with a pass-through fence, P18 paid path, P19 real
+fence). The real fence landed in the same pass, so the P17 exit check "valid headers, no payment → 402" is
+instead **409 `NOT_WINNER`** for a job with no claims. That is the P19 behaviour and the stronger one: a
+losing or stale agent never even learns the price. Everything else matches.
+
+`API_ARKIV_ADDRESS` and `PROVIDER_ALLOW_CHAOS` were added to `.env`/`.env.example` as ICD-2 says.
+
+Verified live, all three instances: each publishes its `Service` entity to Arkiv and all three are
+discoverable by capability with correct prices (scribe-b 0.04 < scribe-a 0.05 < scribe-premium 2.00 FUSD),
+which is the Hedera "an agent that finds the endpoint" requirement. The 402 challenge carries
+`extra.feePayer` from our own facilitator. Missing headers → 400, junk `PAYMENT-SIGNATURE` → 402
+`invalid_payment_payload`, unknown payment → 404, stock baseline route → 402 from the unmodified
+`@x402/fastify` middleware.
+
+The job pipeline was exercised directly rather than left until a payment exists: a wrong `inputHash` raises
+`InputHashMismatch`, the real sample audio downloads and hashes correctly, Whisper + the summary model
+return a usable meeting summary in 7.6 s, and `outputHash` is deterministic over `{transcript, summary}`.
+`hcsSeq` is still 0 because nothing publishes to our topic until the API links an agent (P25).
