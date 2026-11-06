@@ -89,7 +89,7 @@ humans 0 | agents 0 | agent_tokens 0 | owner_sessions 0
 operator balance unchanged (510.86 HBAR) -- no Hedera account was created or funded
 ```
 
-This is the important property: agent linking creates a Hedera account, funds an Arkiv wallet and publishes to
+This is the important property: agent linking creates a Hedera account and publishes to
 HCS, and **none of it happens** unless World returns a validated approval first. The side effects are strictly
 downstream of the `APPROVED` branch in `startWorldWorker`.
 
