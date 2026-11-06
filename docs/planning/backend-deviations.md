@@ -141,3 +141,19 @@ expired intent is rejected *before* claiming a row, so a later legitimate attemp
 `FAILED` row may be retried with `attempts + 1`; and two concurrent claims for one tx id yield exactly one
 winner. Two extra guard tests pin the 2 s pre-deadline cutoff and the duration cap boundary (120 accepted,
 121 refused).
+
+## P14/P15 — no deviation; extra property tests
+
+The intent signer and resolver match the doc. `packages/x402-hedera` gained tests beyond the doc's four and
+three: that the signed bytes really carry a 120 s validity and our chosen tx id (read back with
+`Transaction.fromBytes`), that two intents built at the same instant collide on tx id so a retry cannot
+double-spend, that the HBAR (`0.0.0`) fallback produces hbar legs and no token legs, that memo/amount/
+feePayer/network are all validated, and that the resolver never returns VOID while Mirror knows the
+transaction, treats `deadline + 45 s` as the exact boundary, and lets a Mirror outage propagate instead of
+being mistaken for VOID.
+
+One test fix: `Network` in `@x402/core` is the template type `` `${string}:${string}` ``, so a
+"foreign network" test literal must be `eip155:84532`, not `base-sepolia`.
+
+`scripts/smoke-pay.ts` reads the baseline payer key from either the structured secrets shape or the flat
+incremental log written by the crash-safe bootstrap.
