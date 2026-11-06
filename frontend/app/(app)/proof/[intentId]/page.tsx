@@ -25,7 +25,12 @@ function Proof() {
   const d = cfg.assetDecimals;
   const trail = (tl.data?.events ?? []).filter((e) => (e as any).round === x.round || e.t === 'LINK').sort((a, b) => a.seq - b.seq);
   const claim = trail.find((e) => e.t === 'CLAIM' && String((e as any).agent).toLowerCase() === x.agentAddr.toLowerCase());
-  const r = (x.result ?? {}) as { summary?: string; outputHash?: string; refundTxId?: string };
+  const r = (x.result ?? {}) as { summary?: string; outputHash?: string; refundTxId?: string; agentkit?: { address: string; humanId: string | null } | null };
+  const humanBacked = r.agentkit
+    ? r.agentkit.humanId
+      ? `✓ human-backed · AgentBook ${short(r.agentkit.humanId, 6)}`
+      : `signed by ${short(r.agentkit.address)} · not in AgentBook`
+    : 'no proof sent';
 
   return (
     <div className="col gap-l">
@@ -38,7 +43,7 @@ function Proof() {
         <div className="card">
           <div className="eyebrow">Intent (stored before sending)</div>
           {[
-            ['Job', short(x.jobKey, 10)], ['Round', String(x.round)], ['Agent', short(x.agentAddr)], ['Provider', x.providerId],
+            ['Job', short(x.jobKey, 10)], ['Round', String(x.round)], ['Agent', short(x.agentAddr)], ['World AgentKit', humanBacked], ['Provider', x.providerId],
             ['Pays to', x.payTo], ['Tx id (ours)', x.txId], ['Dies at', clock(x.deadline)], ['Attempts', String(x.attempts ?? 1)], ['Last error', x.lastError ?? '—'],
           ].map(([k, v]) => <div className="kv" key={k}><span className="k">{k}</span><span className="v mono">{v}</span></div>)}
         </div>
