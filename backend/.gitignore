@@ -9,3 +9,4 @@ apps/web/dist/
 services/provider/public/*.mp3
 !services/provider/public/sample-meeting.mp3
 coverage/
+.logs/
