@@ -78,3 +78,25 @@ grant and `client_secret_post`, and advertise scope `openid` — matching the do
 `sandbox.auth.world.org` additionally offers `refresh_token`, `token-exchange` and `offline_access`.
 Registering the confidential client needs a human (portal login), so `WORLD_CLIENT_ID` / `WORLD_CLIENT_SECRET`
 are still placeholders.
+
+## P6 — bootstrap persists each key the moment its account exists
+
+The doc's `bootstrap-hedera.ts` holds all seven generated private keys in memory and writes
+`deployments/testnet.json` + `.secrets/testnet-keys.json` once, at the very end. Any interruption after
+the first `AccountCreateTransaction` leaves funded accounts on testnet whose keys no longer exist anywhere.
+This is not hypothetical: an interrupted first run spent **171 HBAR** creating accounts that are now
+unrecoverable.
+
+`newAccount()` now appends `{label}:{accountId} -> privateKey` to `.secrets/testnet-keys.json` immediately
+after each receipt, and re-reads an existing file on startup so a resumed run keeps earlier keys. The final
+structured file is written as before, with the flat log kept alongside it for recovery.
+
+## P8 — the follower must commit one HTTP page at a time
+
+`TopicFollower.sync()` reads through `Mirror.topicMessagesPage`, which itself walks up to `maxPages` HTTP
+pages and is **all-or-nothing**: a throw on its second page discards the first. Calling it with the default
+bound made the "commit slice by slice, resume from lastSeq" property illusory — a unit test with a mirror
+that fails mid-walk showed `latestSeq` falling back to 0.
+
+`sync()` now passes `maxPages = 1`, so every HTTP page is a commit point. A mid-walk failure keeps
+everything already read and the next `sync()` resumes with `sequencenumber=gt:<lastSeq>`.
