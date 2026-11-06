@@ -124,3 +124,20 @@ database and assert that a duplicate `(job_key, round)`, a reused `tx_id`, a sec
 one provider+job, a reused `payment_tx_id` and a replayed `fac_settlements` row are each rejected — while a
 new round after VOID and a retry after FAILED are still allowed. Tests skip themselves when `DATABASE_URL`
 is absent; `vitest.config.ts` now loads `.env` for them.
+
+## P12/P13 — facilitator verified against the live package surface
+
+Every import the doc names was checked against the installed packages before use:
+`x402Facilitator` (with `onBeforeVerify`/`onBeforeSettle`/`onAfterSettle` hooks) from `@x402/core/facilitator`,
+and `createHederaClient`, `createHederaPreflightTransfer`, `createHederaSignAndSubmitTransaction`,
+`createHederaVerifyPayerSignature`, `toFacilitatorHederaSigner`, `extractTransactionFromPayload` from
+`@x402/hedera`. All present at 2.30.0; no deviation needed.
+
+Added `services/facilitator/test/replay.test.ts` beyond the doc's two guard tests. The replay table is the
+S4 guarantee at our door, and the doc only exercises the window guard. The new tests drive `settleOnce`
+against the live database and prove: a tx id already `SETTLING` or `SETTLED` is refused with
+`forkos_replay_detected` without reaching the network; `attempts` is not bumped by a refused replay; an
+expired intent is rejected *before* claiming a row, so a later legitimate attempt is not locked out; a
+`FAILED` row may be retried with `attempts + 1`; and two concurrent claims for one tx id yield exactly one
+winner. Two extra guard tests pin the 2 s pre-deadline cutoff and the duration cap boundary (120 accepted,
+121 refused).
