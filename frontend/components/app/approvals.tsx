@@ -91,7 +91,10 @@ export function ApprovalProvider({ children }: { children: ReactNode }) {
   return (
     <C.Provider value={{ revoke }}>
       {children}
-      <Sheet open={!!cur} onClose={cancel} title={cur?.title} icon={Icon}>
+      {/* Closing the sheet only hides it: the request stays open and can still be approved on the phone.
+          Denying is an explicit action (the button below) — otherwise dismissing the sheet silently denied the
+          payment and the agents started a new round. */}
+      <Sheet open={!!cur} onClose={() => setCur(null)} title={cur?.title} icon={Icon}>
         {cur && (cur.status === 'DENIED' || cur.status === 'EXPIRED') ? (
           <StateBlock icon={ShieldAlert} tone="bad" title={cur.status === 'DENIED' ? 'Denied in World App' : 'Approval expired'}
             message={cur.kind === 'OVERCAP' ? 'No payment was made. The agent gets APPROVAL_DENIED.' : 'Nothing changed.'}
@@ -112,7 +115,7 @@ export function ApprovalProvider({ children }: { children: ReactNode }) {
               { label: 'Human approves in World App', state: cur.status === 'PENDING' ? 'active' : 'done', icon: Fingerprint },
               { label: cur.kind === 'REVOKE' ? 'REVOKE on HCS · Arkiv link → REVOKED' : 'Payment continues', state: cur.status === 'PENDING' ? 'todo' : 'done', icon: BadgeCheck },
             ]} />
-            <button className="btn ghost block" onClick={cancel}>Cancel</button>
+            <button className="btn ghost block" onClick={cancel}>{cur.kind === 'OVERCAP' ? 'Deny this payment' : 'Deny this request'}</button>
           </>
         )}
       </Sheet>

@@ -9,7 +9,7 @@ import type { Agent, Job, TimelineEv } from '@/lib/types';
 
 export function Timeline({ jobKey, job, agents }: { jobKey: string; job: Job | null; agents: Agent[] }) {
   const { cfg } = useConfig();
-  const q = useQuery({ queryKey: ['race', 'timeline', jobKey], queryFn: () => api.timeline(jobKey), refetchInterval: 4000 });
+  const q = useQuery({ queryKey: ['race', 'timeline', jobKey], queryFn: () => api.timeline(jobKey), refetchInterval: 4000, refetchIntervalInBackground: true });
   const label = (addr?: unknown) => (typeof addr === 'string' ? agents.find((a) => a.agentAddr.toLowerCase() === addr.toLowerCase())?.label ?? short(addr) : '');
   const d = cfg?.assetDecimals ?? 6;
 

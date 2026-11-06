@@ -11,7 +11,7 @@ const TONE: Record<string, 'ok' | 'bad' | 'warn' | 'info' | 'neon' | undefined> 
 
 export function Board({ jobKey, agents, winnerSeq }: { jobKey: string; agents: Agent[]; winnerSeq?: number }) {
   const { cfg } = useConfig();
-  const q = useQuery({ queryKey: ['race', 'board', jobKey], queryFn: () => api.board(jobKey), refetchInterval: 4000 });
+  const q = useQuery({ queryKey: ['race', 'board', jobKey], queryFn: () => api.board(jobKey), refetchInterval: 4000, refetchIntervalInBackground: true });
   const label = (addr: string) => agents.find((a) => a.agentAddr.toLowerCase() === addr.toLowerCase())?.label ?? short(addr);
   const rows = [...(q.data?.claims ?? [])].sort((a, b) => a.round - b.round || a.seq - b.seq);
   return (
