@@ -1,4 +1,4 @@
-# ForkOS — the exactly-once layer for AI agent payments
+# Klero — the exactly-once layer for AI agent payments
 
 > **Agents fork. Money doesn't.**
 > ETHGlobal Mumbai 2026 · Hedera · World ID
@@ -9,7 +9,10 @@ Every agent wallet built so far stops *bad* payments — limits, allowlists, sca
 question. So agents either retry and pay twice, or give up and never deliver. It gets worse with parallel
 sub-agents: your Claude agent and your Cursor agent can both buy the same transcription.
 
-ForkOS makes an agent payment **settle at most once, ever — or be provably void.** There is no third state.
+Klero makes an agent payment **settle at most once, ever — or be provably void.** There is no third state.
+
+> Klero was built under the working name **ForkOS**, so some identifiers still carry it: the `pnpm forkos audit`
+> CLI, the `@forkos/*` packages, the `forkos:` payment memo and error codes such as `forkos_replay_detected`.
 
 ---
 
@@ -152,10 +155,20 @@ pnpm dev:api                    # :4040
 
 pnpm agent:link "Agent A"   # approve on your phone (World ID)
 pnpm baseline                   # 3 independent agents -> 3 payments
-pnpm agents 3                   # 3 ForkOS agents      -> 1 payment
+pnpm agents 3                   # 3 Klero agents       -> 1 payment
 ```
 
 `pnpm test` runs the suite; `pnpm typecheck` checks the whole workspace.
+
+**Windows, one command** (after setup; Docker Desktop running) — starts Postgres + migrations, the facilitator, the
+three providers and the API in the background, waits for every health check and warns if a baseline wallet is low:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\scripts\win\dev-up.ps1     # stop: backend\scripts\win\dev-down.ps1
+```
+
+Also in `backend\scripts\win\`: `use-meeting.ps1 -N <n>` (fresh demo meeting) and `topup-baseline.ps1`.
+The full demo walkthrough is [`docs/demo-video.md`](docs/demo-video.md).
 
 ## Limitations (honest)
 
