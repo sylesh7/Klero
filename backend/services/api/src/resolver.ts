@@ -83,6 +83,11 @@ async function tickAbandoned() {
     if (view.status !== 'CLAIMED' || !view.winner) continue;
     const age = nowS - Number(view.winner.cts.split('.')[0]);
     if (age < WINNER_GRACE_S) continue;
+    // The topic is shared by every deployment that holds the operator key. Only the backend this human signed in
+    // to has their intents and over-cap approvals; any other one would wrongly see the round as abandoned and VOID
+    // it while the human is still approving. So only close rounds for humans registered here.
+    const [mine] = await sql`select 1 from humans where human_hash = ${view.winner.human}`;
+    if (!mine) continue;
     const [intent] = await sql`select 1 from intents where job_key = ${jobKey} and round = ${view.round}`;
     if (intent) continue;
     const [pending] = await sql`select 1 from approvals where status in ('PENDING','APPROVED') and action->>'jobKey' = ${jobKey}
