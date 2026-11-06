@@ -100,3 +100,27 @@ that fails mid-walk showed `latestSeq` falling back to 0.
 
 `sync()` now passes `maxPages = 1`, so every HTTP page is a commit point. A mid-walk failure keeps
 everything already read and the next `sync()` resumes with `sequencenumber=gt:<lastSeq>`.
+
+## P10 — Arkiv smoke uses a faucet-funded wallet
+
+The doc's `smoke-arkiv.ts` signs with `FORKOS_AGENT_KEY`, which has no tGLM: agent wallets are funded by the
+API at link time (`AGENT_ARKIV_FUND_WEI`), not by the faucet. The smoke now defaults to
+`PROVIDER_ARKIV_KEY` (faucet-funded) and honours `SMOKE_ARKIV_KEY` for an override.
+
+Measured on Rabdi: `createEntity` took **8.3 s**, not the ~5 s the exit check suggests. Recorded in
+`arkiv/friction.md` along with the consequence — agents publish the HCS `CLAIM` before the Arkiv claim, so
+winner selection is never blocked on an Arkiv round trip. `eq('$key', key(...))` worked, so the
+`getEntity` fallback the doc offers was not needed.
+
+## P11 — migration runner silences Postgres notices
+
+`create table if not exists schema_migrations` emits a `NOTICE: relation already exists, skipping` on every
+re-run, which postgres.js prints as a raw object that looks exactly like a failure. `onnotice: () => {}`
+silences it so a clean re-run prints only `skip 001_init.sql`.
+
+Added `packages/shared/test/schema.test.ts`: the doc's exit check only lists table names, which proves
+nothing about the constraints the exactly-once guarantee actually rests on. The new tests drive the live
+database and assert that a duplicate `(job_key, round)`, a reused `tx_id`, a second `RUNNING`/`DONE` job for
+one provider+job, a reused `payment_tx_id` and a replayed `fac_settlements` row are each rejected — while a
+new round after VOID and a retry after FAILED are still allowed. Tests skip themselves when `DATABASE_URL`
+is absent; `vitest.config.ts` now loads `.env` for them.

@@ -1,0 +1,34 @@
+{
+  "network": "hedera:testnet",
+  "createdAt": "2026-11-06T01:50:23.832Z",
+  "operatorId": "0.0.5899352",
+  "token": {
+    "id": "0.0.11332887",
+    "symbol": "FUSD",
+    "decimals": 6
+  },
+  "topicId": "0.0.11332888",
+  "facilitatorFeePayerId": "0.0.11332879",
+  "providers": {
+    "scribe-a": {
+      "accountId": "0.0.11332881",
+      "price": "50000",
+      "name": "Scribe A"
+    },
+    "scribe-b": {
+      "accountId": "0.0.11332882",
+      "price": "40000",
+      "name": "Scribe B"
+    },
+    "scribe-premium": {
+      "accountId": "0.0.11332883",
+      "price": "2000000",
+      "name": "Scribe Premium"
+    }
+  },
+  "baselineAgents": [
+    "0.0.11332884",
+    "0.0.11332885",
+    "0.0.11332886"
+  ]
+}
