@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Crosshair, Download, Play, RotateCcw, Terminal } from 'lucide-react';
 import { AppShell, RequireOwner } from '@/components/app/shell';
 import { CopyButton, Notice, Pill, Spinner } from '@/components/app/ui';
@@ -16,7 +17,7 @@ import { api } from '@/lib/api';
 import { useConfig } from '@/lib/config';
 import { ENV } from '@/lib/env';
 import { useEvent, type EventType } from '@/lib/events';
-import { short } from '@/lib/format';
+import { clock, short } from '@/lib/format';
 import { jobKeyOf } from '@/lib/jobkey';
 import { useOwner } from '@/lib/session';
 
@@ -42,6 +43,15 @@ function Race() {
   const myAgents = new Set((me.data?.agents ?? []).map((a) => a.agentAddr.toLowerCase()));
 
   const lock = (j: string, s = Math.floor(Date.now() / 1000) - 5) => router.replace(`/race?job=${j}&since=${s}`);
+
+  // "New race" only moves the counting window to now — make that visible, or the click looks like it did nothing.
+  const newRace = () => {
+    if (!jobKey) return;
+    const s = Math.floor(Date.now() / 1000) - 5;
+    lock(jobKey, s);
+    qc.invalidateQueries({ queryKey: ['race'] });
+    toast.success(`New race: counting payments from ${clock(s)}`, { description: 'Now run pnpm baseline, then pnpm agents 3.' });
+  };
 
   const loadDemo = async () => {
     if (!cfg) return;
@@ -71,12 +81,13 @@ function Race() {
             <span className="mono amount md">{jobKey ? short(jobKey, 10) : 'none locked'}</span>
             {jobKey && <CopyButton text={jobKey} small />}
             {job.data && <Pill tone="ink">round {job.data.round}</Pill>}
+            {jobKey && <Pill tone="ink">counting since {clock(since)}</Pill>}
             {job.data && <Pill tone={job.data.status === 'DONE' || job.data.status === 'PAID' ? 'ok' : job.data.status === 'REFUNDED' ? 'warn' : 'info'}>{job.data.status}</Pill>}
           </div>
         </div>
         <div className="row wrap">
           {ENV.DEMO_KEY && <button className="btn" onClick={loadDemo} disabled={loading}>{loading ? <Spinner /> : <Download size={16} />} Load demo job</button>}
-          {jobKey && <button className="btn ghost" onClick={() => lock(jobKey)} title="Reset the baseline window to now"><RotateCcw size={16} /> New race</button>}
+          {jobKey && <button type="button" className="btn ghost" onClick={newRace} title="Reset the counting window to now"><RotateCcw size={16} /> New race</button>}
           <label className="row small"><input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} /> Follow live</label>
           <span className="input-wrap" style={{ minWidth: 220 }}>
             <input className="input mono" placeholder="paste jobKey (64 hex)" value={paste} onChange={(e) => setPaste(e.target.value.trim())} />
