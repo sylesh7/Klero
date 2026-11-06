@@ -162,6 +162,33 @@ describe('referee — attacks on exactly-once', () => {
     expect(v.status).toBe('PAYING');
   });
 
+  it('REFUND that reaches consensus before SETTLED still counts once SETTLED arrives (seen live)', () => {
+    seq = 0;
+    const msgs = [link(A, '0.0.201'), claim(A, '0.0.201'), intent(A, TX0), at(PROV, { v: 1, t: 'REFUND', job, round: 0, tx: TX0, rtx: TX1, amt: '50000' })];
+    expect(viewJob(msgs, job, opts).status).toBe('PAYING'); // held, not applied: no SETTLED yet
+    expect(viewJob(msgs, job, opts).refund).toBeNull();
+    msgs.push(settled(TX0));
+    const v = viewJob(msgs, job, opts);
+    expect(v.status).toBe('REFUNDED');
+    expect(v.refund?.rtx).toBe(TX1);
+  });
+
+  it('an early REFUND for a different tx is not applied when the real SETTLED arrives', () => {
+    seq = 0;
+    const msgs = [link(A, '0.0.201'), claim(A, '0.0.201'), intent(A, TX0), at(PROV, { v: 1, t: 'REFUND', job, round: 0, tx: TX1, rtx: TX1, amt: '50000' }), settled(TX0)];
+    const v = viewJob(msgs, job, opts);
+    expect(v.refund).toBeNull();
+    expect(v.status).toBe('PAID');
+  });
+
+  it('an early REFUND from an account that is not a known provider is ignored', () => {
+    seq = 0;
+    const msgs = [link(A, '0.0.201'), claim(A, '0.0.201'), intent(A, TX0), at('0.0.666', { v: 1, t: 'REFUND', job, round: 0, tx: TX0, rtx: TX1, amt: '50000' }), settled(TX0)];
+    const v = viewJob(msgs, job, opts);
+    expect(v.refund).toBeNull();
+    expect(v.status).toBe('PAID');
+  });
+
   it('REFUND from an account that is not a known provider is ignored', () => {
     seq = 0;
     const msgs = [link(A, '0.0.201'), claim(A, '0.0.201'), intent(A, TX0), settled(TX0), at('0.0.666', { v: 1, t: 'REFUND', job, round: 0, tx: TX0, rtx: TX1, amt: '50000' })];
