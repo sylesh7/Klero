@@ -1,0 +1,16 @@
+flowchart TD
+  A["Job request<br/>agent tool call or MCP"] --> B["jobKey = sha256(human | capability | input)<br/>same for every agent of one human"]
+  B --> C1["Agent A<br/>CLAIM · HCS seq 10"]
+  B --> C2["Agent B<br/>CLAIM · HCS seq 11"]
+  B --> C3["Agent C<br/>CLAIM · HCS seq 12"]
+  C1 --> D["Referee<br/>first valid CLAIM in HCS<br/>consensus order wins"]
+  C2 --> D
+  C3 --> D
+  D -->|"losers wait for the winner's result,<br/>they never re-buy"| E["API /v1/pay<br/>winner + epoch + policy<br/>agents never hold payment keys"]
+  E -->|"over the cap"| F["World ID step-up<br/>approval bound to the exact<br/>job, provider and amount"]
+  F --> G
+  E -->|"under the cap, zero human steps"| G["Payment intent<br/>tx id known before send,<br/>120 s clock, stored first"]
+  G -->|"INTENT on HCS"| H["Provider fence<br/>live winner, current epoch,<br/>World AgentKit · AgentBook"]
+  H --> I["Our x402 facilitator<br/>verify, replay table, settle<br/>FUSD on HTS, fee paid for the agent"]
+  I -->|"one payment, 2.00 FUSD, 3 agents"| J["Re-fence, then run the job"]
+  J --> K["Mirror Node confirms<br/>SETTLED, then DONE on HCS"]
