@@ -337,11 +337,13 @@ running against live testnet — are logged in
 [`docs/planning/backend-deviations.md`](docs/planning/backend-deviations.md).
 
 **Open source used:** Hiero SDK (`@hiero-ledger/sdk`), x402 (`@x402/core`, `@x402/hedera`), World AgentKit, Fastify,
-Next.js, viem, jose, Zod, postgres.js, Vitest.
+Next.js, viem, [`jose`](https://github.com/panva/jose) (panva's JWT library, used to verify World ID tokens), Zod,
+postgres.js, Vitest.
 
 ## Team
 
-sylesh7 · [github.com/sylesh7](https://github.com/sylesh7)
+- sylesh7 · [github.com/sylesh7](https://github.com/sylesh7)
+- Jose Regish · [github.com/hackerjose25](https://github.com/hackerjose25)
 
 ## Licence
 
