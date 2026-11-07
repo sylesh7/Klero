@@ -1,0 +1,14 @@
+flowchart TD
+  A["Payment sent<br/>signed x402 transfer, validDuration 120 s"] -->|"200 + PAYMENT-RESPONSE"| P["PAID<br/>fetch the result by tx id"]
+  A -->|"connection dies mid-flight"| U["PAYMENT_UNKNOWN<br/>never re-sign"]
+  U --> R["Resolver<br/>asks Mirror Node for that exact tx id"]
+  R -->|"found, SUCCESS"| P
+  R -->|"found, non-SUCCESS"| F["FAILED<br/>the money did not move"]
+  R -->|"404, before deadline + 45 s"| W["Wait<br/>resend the identical bytes or nothing"]
+  W --> R
+  R -->|"404, after deadline + 45 s"| V["VOID, proven<br/>every node now rejects those bytes,<br/>any earlier copy would be on Mirror"]
+  V -->|"VOID on HCS"| N["Round 1 opens<br/>a new winner, a new intent"]
+  P --> S["SETTLED on HCS<br/>one payment, ever"]
+  F --> N
+  S --> L["forkos audit<br/>anyone rebuilds it from the public topic<br/>21 jobs, 79 checks, all passed"]
+  N --> L
