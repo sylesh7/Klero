@@ -343,7 +343,7 @@ postgres.js, Vitest.
 ## Team
 
 - sylesh7 · [github.com/sylesh7](https://github.com/sylesh7)
-- Jose · [github.com/hackerjose25](https://github.com/hackerjose25)
+- Jose Regish · [github.com/hackerjose25](https://github.com/hackerjose25)
 
 ## Licence
 
